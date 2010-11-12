@@ -1,12 +1,15 @@
 module Resque
   module Plugins
     # ResqueCleaner class provides useful functionalities to retry or clean
-    # failed jobs.
+    # failed jobs. Let's clean up your failed list!
     class ResqueCleaner
-      # ResqueCleaner fetches all elements from Redis once and checks them
-      # by linear when filtering. Since there is a performance concern,
-      # ResqueCleaner only targets the latest x(default 1000) jobs.
-      # You can change the value. e.g. cleaner.limiter.maximum = 2000
+      include Resque::Helper
+      # ResqueCleaner fetches all elements from Redis and checks them
+      # by linear when filtering them. Since there is a performance concern,
+      # ResqueCleaner handles only the latest x(default 1000) jobs.
+      #
+      # You can change the value through limiter attribute.
+      # e.g. cleaner.limiter.maximum = 5000
       attr_reader :limiter
 
       # Set false if you don't show any message.
@@ -29,15 +32,15 @@ module Resque
         @failure
       end
 
-      # Outputs summary of failure jobs by date.
-      def summary_by_date
-        jobs = @limiter.jobs
+      # Stats by date.
+      def stats_by_date(&block)
+        jobs = select(&block)
         summary = {}
         jobs.each do |job|
           date = job["failed_at"][0,10]
           summary[date] ||= 0
           summary[date] += 1
-        end if jobs
+        end
 
         if print?
           log too_many_message if @limiter.on?
@@ -49,35 +52,80 @@ module Resque
         summary
       end
 
-      def summary_by_class
+      # Stats by class.
+      def stats_by_class
       end
 
       # Returns every jobs for which block evaluates to true.
       def select(&block)
         jobs = @limiter.jobs
-        @limiter.jobs.select &block if jobs
+        block_given? ? @limiter.jobs.select(&block) : jobs
       end
 
       # Clears every jobs for which block evaluates to true.
       def clear(&block)
-
+        @limiter.lock do
+          cleared = 0
+          @limiter.jobs.each_with_index do |job,i|
+            if block.call(job)
+              index = @limiter.start_index + i - cleared
+              # fetch again since you can't ensure that it is always true:
+              # a == endode(decode(a))
+              value = redis.lindex(:failed, index)
+              redis.lrem(:failed, 1, value)
+              cleared += 1
+            end
+          end
+        end
       end
 
       # Retries every jobs for which block evaluates to true.
-      def retry(&block)
+      def requeue(&block)
+        @limiter.lock do
+          @limiter.jobs.each_with_index do |job,i|
+            if block.call(job)
+              job['retried_at'] = Time.now.strftime("%Y/%m/%d %H:%M:%S")
+              redis.lset(:failed, @limiter.start_index+i, Resque.encode(job))
+              Job.create(job['queue'], job['payload']['class'], *job['payload']['args'])
+            end
+          end
+        end
       end
 
       # Retries and clears every jobs for which block evaluates to true.
-      def retry_and_clear(&block)
+      def requeue_and_clear(requeue=true,clear=true,&block)
+        cleared = 0
+        @limiter.lock do
+          @limiter.jobs.each_with_index do |job,i|
+            if block.call(job)
+              index = @limiter.start_index + i - cleared
+
+              # removes job from :failed
+              value = redis.lindex(:failed, index)
+              redis.lrem(:failed, 1, value)
+              cleared += 1
+
+              # then requeues the job
+              Job.create(job['queue'], job['payload']['class'], *job['payload']['args'])
+            end
+          end
+        end
       end
 
-      # Clears all jobs except the last x jobs
+      # Clears all jobs except the last X jobs
       def clear_stale
         return unless @limiter.on?
         redis.ltrim(:failed, -@limiter.maximum, -1)
       end
 
-      # Returns 
+      # Returns Proc which you can add a useful condition easily.
+      # e.g.
+      # cleaner.clear &cleaner.proc.retried
+      #   #=> Clears all jobs retried.
+      # cleaner.select &cleaner.proc.after(10.days.ago).klass(EmailJob)
+      #   #=> Selects all EmailJob failed within 10 days.
+      # cleaner.select &cleaner.proc{|j| j["exception"]=="RunTimeError"}.klass(EmailJob)
+      #   #=> Selects all EmailJob failed with RunTimeError.
       def proc(&block)
         FilterProc.new(&block)
       end
@@ -87,6 +135,7 @@ module Resque
         def retried
           FilterProc.new {|job| self.call(job) && job['retried_at'].blank?}
         end
+        alias :requeued, :retried
 
         def before(time)
           time = Time.parse(time) if time.is_a?(String)
@@ -123,6 +172,7 @@ module Resque
         def initialize(cleaner)
           @cleaner = cleaner
           @maximum = DEFAULT_MAX_JOBS
+          @locked = false
         end
 
         # Returns true if limiter is ON: number of failed jobs is more than
@@ -131,13 +181,62 @@ module Resque
           @cleaner.failure.count > @maximum
         end
 
+        # Returns limited count.
         def count
-          on? ? @maximum : @cleaner.failure.count
+          if @locked
+            @jobs.size
+          else
+            on? ? @maximum : @cleaner.failure.count
+          end
         end
 
+        # Returns jobs. If numbers of jobs is more than maixum, it returns only
+        # the maximum.
         def jobs
-          jobs = @cleaner.failure.all( - count, count)
-          jobs.is_a?(Array) ? jobs : [jobs] if jobs
+          if @locked
+            @jobs
+          else
+            all( -count, count)
+          end
+        end
+
+        # wraps Resque's all and returns always array.
+        def all(index=0,count=1)
+          @cleaner.failure.all( index, count)
+          jobs = [] unless jobs
+          jobs = [jobs] unless jobs.is_a?(Array)
+          jobs
+        end
+
+        # Returns a start index of jobs in :failed list.
+        def start_index
+          if @locked
+            @start_index
+          else
+            on? ? @cleaner.failure.count-@maximum : 0
+          end
+        end
+
+        # Assuming new failures pushed while cleaner is dealing with failures,
+        # you need to lock the range.
+        def lock
+          old = @locked
+
+          unless @locked
+            total_count = @cleaner.failure.count
+            if total_count>@maximum
+              @start_index = total_count-@maximum
+              @jobs = all( @start_index, @maximum)
+            else
+              @start_index = 0
+              @jobs = all( 0, total_count)
+            end
+          end
+
+          @locked = true
+          yield
+        ensure
+          @locked = old
         end
       end
 
@@ -152,7 +251,7 @@ module Resque
       end
 
       def too_many_message
-        "There are too many failed jobs(count=#{@failure.count}). This only looks into last #{@limiter.maximum} jobs."
+        "There are too many failed jobs(count=#{@failure.count}). This only looks at last #{@limiter.maximum} jobs."
       end
     end
   end
