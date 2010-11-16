@@ -7,12 +7,14 @@ $TESTING = true
 require 'test/unit'
 require 'rubygems'
 require 'resque'
+require 'timecop'
 
 begin
   require 'leftright'
 rescue LoadError
 end
-
+require 'resque'
+require 'resque_cleaner'
 
 #
 # make sure we can run redis
@@ -101,8 +103,9 @@ class SomeMethodJob < SomeJob
 end
 
 class BadJob
-  def self.perform
-    raise "Bad job!"
+  def self.perform(name=nil)
+    msg = name ? "Bad job, #{name}" : "Bad job!"
+    raise msg
   end
 end
 
