@@ -54,7 +54,23 @@ module Resque
       end
 
       # Stats by class.
-      def stats_by_class
+      def stats_by_class(&block)
+        jobs = select(&block)
+        summary = {}
+        jobs.each do |job|
+          klass = job["payload"]["class"]
+          summary[klass] ||= 0
+          summary[klass] += 1
+        end
+
+        if print?
+          log too_many_message if @limiter.on?
+          summary.keys.sort.each do |k|
+            log "%15s: %4d" % [k,summary[k]]
+          end
+          log "%15s: %4d" % ["total", @limiter.count]
+        end
+        summary
       end
 
       # Returns every jobs for which block evaluates to true.
@@ -62,11 +78,12 @@ module Resque
         jobs = @limiter.jobs
         block_given? ? @limiter.jobs.select(&block) : jobs
       end
+      alias :failure_jobs :select
 
       # Clears every jobs for which block evaluates to true.
       def clear(&block)
+        cleared = 0
         @limiter.lock do
-          cleared = 0
           @limiter.jobs.each_with_index do |job,i|
             if !block_given? || block.call(job)
               index = @limiter.start_index + i - cleared
@@ -78,45 +95,41 @@ module Resque
             end
           end
         end
+        cleared
       end
 
       # Retries every jobs for which block evaluates to true.
-      def requeue(&block)
+      def requeue(clear_after_requeue=false, &block)
+        requeued = 0
         @limiter.lock do
           @limiter.jobs.each_with_index do |job,i|
             if !block_given? || block.call(job)
-              job['retried_at'] = Time.now.strftime("%Y/%m/%d %H:%M:%S")
-              redis.lset(:failed, @limiter.start_index+i, Resque.encode(job))
+              index = @limiter.start_index + i - requeued
+
+              if clear_after_requeue
+                # remove job
+                value = redis.lindex(:failed, index)
+                redis.lrem(:failed, 1, value)
+              else
+                # mark retried
+                job['retried_at'] = Time.now.strftime("%Y/%m/%d %H:%M:%S")
+                redis.lset(:failed, @limiter.start_index+i, Resque.encode(job))
+              end
+
               Job.create(job['queue'], job['payload']['class'], *job['payload']['args'])
+              requeued += 1
             end
           end
         end
-      end
-
-      # Retries and clears every jobs for which block evaluates to true.
-      def requeue_and_clear(requeue=true,clear=true,&block)
-        cleared = 0
-        @limiter.lock do
-          @limiter.jobs.each_with_index do |job,i|
-            if !block_given? || block.call(job)
-              index = @limiter.start_index + i - cleared
-
-              # removes job from :failed
-              value = redis.lindex(:failed, index)
-              redis.lrem(:failed, 1, value)
-              cleared += 1
-
-              # then requeues the job
-              Job.create(job['queue'], job['payload']['class'], *job['payload']['args'])
-            end
-          end
-        end
+        requeued
       end
 
       # Clears all jobs except the last X jobs
       def clear_stale
-        return unless @limiter.on?
-        redis.ltrim(:failed, -@limiter.maximum, -1)
+        return 0 unless @limiter.on?
+        c = @limiter.maximum
+        redis.ltrim(:failed, -c, -1)
+        c
       end
 
       # Returns Proc which you can add a useful condition easily.
