@@ -35,42 +35,37 @@ module Resque
 
       # Stats by date.
       def stats_by_date(&block)
-        jobs = select(&block)
-        summary = {}
+        jobs, stats = select(&block), {}
         jobs.each do |job|
           date = job["failed_at"][0,10]
-          summary[date] ||= 0
-          summary[date] += 1
+          stats[date] ||= 0
+          stats[date] += 1
         end
 
-        if print?
-          log too_many_message if @limiter.on?
-          summary.keys.sort.each do |k|
-            log "%s: %4d" % [k,summary[k]]
-          end
-          log "%10s: %4d" % ["total", @limiter.count]
-        end
-        summary
+        print_stats(stats) if print?
+        stats 
       end
 
       # Stats by class.
       def stats_by_class(&block)
-        jobs = select(&block)
-        summary = {}
+        jobs, stats = select(&block), {}
         jobs.each do |job|
           klass = job["payload"]["class"]
-          summary[klass] ||= 0
-          summary[klass] += 1
+          stats[klass] ||= 0
+          stats[klass] += 1
         end
 
-        if print?
-          log too_many_message if @limiter.on?
-          summary.keys.sort.each do |k|
-            log "%15s: %4d" % [k,summary[k]]
-          end
-          log "%15s: %4d" % ["total", @limiter.count]
+        print_stats(stats) if print?
+        stats 
+      end
+
+      # Print stats
+      def print_stats(stats)
+        log too_many_message if @limiter.on?
+        stats.keys.sort.each do |k|
+          log "%15s: %4d" % [k,stats[k]]
         end
-        summary
+        log "%15s: %4d" % ["total", @limiter.count]
       end
 
       # Returns every jobs for which block evaluates to true.
