@@ -3,4 +3,4 @@ Resque-Cleaner
 
 Resque-Cleaner is a Resque plugin which helps you to deal with failure jobs.
 
-(This README will be update in days.)
+(The library is yet to release. I plan to release this libray within a few days with documentation...)
