@@ -8,14 +8,14 @@ Description
 -----------
 
 ResqueCleaner is a [Resque](https://github.com/defunkt/resque) plugin which
-helps you to deal with failed jobs of Resque by:
+helps you to deal with failed jobs on Resque by:
 
 * Showing stats of failed jobs
 * Retrying failed jobs
 * Removing failed jobs
 * Filtering failed jobs
 
-Although ResqueCleaner hasn't integrated with Resque's web-based interface yet,
+Although ResqueCleaner has not integrated with Resque's web-based interface yet,
 it is pretty easy to use on irb(console).
 
 
@@ -23,6 +23,7 @@ Installation
 ------------
 
 Install as a gem:
+
     $ gem install resque-cleaner
 
 
@@ -53,9 +54,11 @@ You could also group them by class.
     => {'BadJob' => 3, ...}
 
 You can get the ones filtered with a block: it targets only jobs which the block
-evaluetes true. e.g. Show stats only of jobs entried with some arguments.
+evaluetes true.
 
-    > cleaner.stats_by_date{|job| job["payload"]["args"].size > 0}
+e.g. Show stats only of jobs entried with some arguments:
+
+    > cleaner.stats_by_date {|j| j["payload"]["args"].size > 0}
     2009/03/13:    3
     2009/11/13:    7
     2010/08/13:   11
@@ -69,12 +72,16 @@ You can retry all failed jobs with this method.
     > cleaner.requeue
 
 Of course, you can filter jobs with a block; it requeues only jobs which the
-block evaluates true. e.g. Retry only jobs with some arguments.
+block evaluates true. 
 
-    > cleaner.requeue{ |job| job["payload"]["args"].size > 0}
+e.g. Retry only jobs with some arguments:
+
+    > cleaner.requeue{ |j| j["payload"]["args"].size > 0}
 
 The job hash is extended with a module which defines some useful methods. You
-can use it in the blcok. e.g. Retry only jobs entried within a day.
+can use it in the blcok.
+
+e.g. Retry only jobs entried within a day:
 
     > cleaner.requeue {|j| j.after?(1.day.ago)}
 
@@ -82,7 +89,7 @@ e.g. Retry EmailJob entried with arguments within 3 days:
 
     > cleaner.requeue {|j| j["payload"]["args"]>0 && j.after?(3.days.ago) && j.klass?(EmailJob)}
 
-See Helper Methods bellow for more.
+See Helper Methods section bellow for more information.
 
 NOTE:
 [1.day.ago](https://github.com/rails/rails/blob/master/activesupport/lib/active_support/core_ext/numeric/time.rb)
@@ -90,7 +97,7 @@ is not in standard library. It is equivalent to `Time.now - 60*60*24*3`.
 
 **Clear Jobs**
 
-You can clear all failed jobs with this method.
+You can clear all failed jobs with this method:
 
     > cleaner.clear
 
@@ -123,7 +130,7 @@ You can just select the jobs of course. Here are some examples:
 
 **Helper Methods**
 
-Here is a list of methods a job extended.
+Here is a list of methods a job extended:
 
     retried?: returns true if the job has already been retried.
     requeued?: alias of retried?.
@@ -136,7 +143,7 @@ Here is a list of methods a job extended.
 Failed Job
 -----------
 
-I show a sample of failed job here; it might help you when you write a block for
+I show a sample of failed job bellow; it might help you when you write a block for
 filtering failed jobs.
 
     {"failed_at": "2009/03/13 00:00:00",
@@ -165,16 +172,16 @@ process but on your Redis, it would not respond ages if you try to deal with all
 of those jobs.
 
 ResqueCleaner supposes recent jobs are more important than old jobs. Therefore
-ResqueCleaner deals with **ONLY LAST X(default=1000)** jobs. In that way, you
-don't have to worry that your block for filtering might be stuck. You can change
-its setting through `limiter` attribute. I will show you how it works with a
-sample situation.
+ResqueCleaner deals with **ONLY LAST X(default=1000) JOBS**. In this way, you
+could avoid slow responses. You can change the number through `limiter` attribute.
+
+Let's see how it works with an follwing example.
 
 **Sample Situation**
 
 * Number of failed jobs: 100,000
 
-Default limiter is 1000 so that it returns 1000 as a count.
+Default limiter is 1000 so that the limiter returns 1000 as a count.
 
     > cleaner.limiter.count
     => 1,000
