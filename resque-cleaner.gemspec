@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name              = "resque-cleaner"
-  s.version           = "0.0.1"
+  s.version           = "0.0.2"
   s.date              = Time.now.strftime('%Y-%m-%d')
   s.summary           = "A Resque plugin cleaning up failure jobs."
   s.homepage          = "http://github.com/ono/resque-cleaner"
