@@ -71,15 +71,18 @@ You can retry all failed jobs with this method.
 Of course, you can filter jobs with a block; it requeues only jobs which the
 block evaluates true. e.g. Retry only jobs with some arguments.
 
-    > cleaner.requeue{|job| job["payload"]["args"].size > 0}
+    > cleaner.requeue{ |job| job["payload"]["args"].size > 0}
 
-You can also use the proc method whic defined some useful filters. e.g. Retry only jobs entried within a day.
+The job hash is extended with a module which defines some useful methods. You
+can use it in the blcok. e.g. Retry only jobs entried within a day.
 
-    > cleaner.requeue &cleaner.proc.after(1.day.ago)
+    > cleaner.requeue {|j| j.after?(1.day.ago)}
 
-You can chain filters. e.g. Retry EmailJob entried with arguments within 3 days 
+e.g. Retry EmailJob entried with arguments within 3 days:
 
-    > cleaner.requeue &cleaner.proc{|j| j["payload"]["args"]>2}.after(3.days.ago).klass(EmailJob)
+    > cleaner.requeue {|j| j["payload"]["args"]>0 && j.after?(3.days.ago) && j.klass?(EmailJob)}
+
+See Helper Methods bellow for more.
 
 NOTE:
 [1.day.ago](https://github.com/rails/rails/blob/master/activesupport/lib/active_support/core_ext/numeric/time.rb)
@@ -94,13 +97,13 @@ You can clear all failed jobs with this method.
 Like you can do with the retry method, the clear metod takes a block. Here are
 some examples:
 
-    > cleaner.clear &cleaner.proc.retried
+    > cleaner.clear {|j| j.retried?}
     => clears all jobs already retried and returns number of the jobs.
 
-    > cleaner.clear &cleaner.proc.queue(:low).before(10.days.ago)
-    => clears all jobs entried in :low queue before 10 days ago.
+    > cleaner.clear {|j| j.queue?(:low) && j.before?('2010-10-10')}
+    => clears all jobs entried in :low queue before 10th October, 2010.
 
-    > cleaner.clear &cleaner.proc{|j| j["exception"]=="RuntimeError"}.queue(:low)
+    > cleaner.clear {|j| j["exception"]=="RuntimeError" && j.queue?(:low)}
     => clears all jobs raised RuntimeError and queued :low queue
 
 **Retry and Clear Jobs**
@@ -108,27 +111,26 @@ some examples:
 You can retry(requeue) and clear failed jobs at the same time; just pass true
 as an argument. e.g. Retry EmailJob and remove from failed jobs.
 
-    > cleaner.requeue(true) &cleaner.proc.klass(EmailJob)
+    > cleaner.requeue(true) {|j| j.klass?(EmailJob)}
 
 **Select Jobs**
 
-If you want to get jobs with filtering, the select method can do that. Here are
-some examples:
+You can just select the jobs of course. Here are some examples:
 
     > cleaner.select {|j| j["exception"]=="RuntimeError"}
-    > cleaner.select &cleaner.proc.after(2.days.ago)
+    > cleaner.select {|j| j.after?(2.days.ago)}
+    > cleaner.select #=> returns all jobs
 
-**Procs**
+**Helper Methods**
 
-Here is a list of pre-defined procs you can use.
+Here is a list of methods a job extended.
 
-    retried: select only jobs retried
-    requeued: alias of retried
-    before(time): select only jobs entried before the time
-    after(time): select only jobs entried after the time
-    klass(klass_or_name): select only the class
-    queue(queue_name): select only jobs queued in the queue
-
+    retried?: returns true if the job has already been retried.
+    requeued?: alias of retried?.
+    before?(time): returns true if the job failed before the time.
+    after?(time): returns true if the job failed after the time.
+    klass?(klass_or_name): returns true if the class of job matches.
+    queue?(queue_name): returns true if the queue of job matches.
 
 
 Failed Job
