@@ -104,29 +104,29 @@ context "ResqueCleaner" do
     assert_equal Time.parse(@cleaner.failure_jobs[0]['failed_at']), Time.parse('2010-08-13')
   end
 
-  test "#proc gives you handy proc definitions" do
+  test "FailedJobEx module extends job and provides some useful methods" do
     # before 2009-04-01
-    ret = @cleaner.select &@cleaner.proc.before('2009-04-01')
+    ret = @cleaner.select {|j| j.before?('2009-04-01')}
     assert_equal 6, ret.size
 
     # after 2010-01-01
-    ret = @cleaner.select &@cleaner.proc.after('2010-01-01')
+    ret = @cleaner.select {|j| j.after?('2010-01-01')}
     assert_equal 22, ret.size
 
     # filter by class
-    ret = @cleaner.select &@cleaner.proc.klass(BadJobWithSyntaxError)
+    ret = @cleaner.select {|j| j.klass?(BadJobWithSyntaxError)}
     assert_equal 7, ret.size
 
     # filter by queue
-    ret = @cleaner.select &@cleaner.proc.queue(:jobs2)
+    ret = @cleaner.select {|j| j.queue?(:jobs2)}
     assert_equal 20, ret.size
 
-    # you can chain
-    ret = @cleaner.select &@cleaner.proc.queue(:jobs2).before('2009-12-01')
+    # combination
+    ret = @cleaner.select {|j| j.queue?(:jobs2) && j.before?('2009-12-01')}
     assert_equal 9, ret.size
 
-    # you can chain with your custom block
-    ret = @cleaner.select &@cleaner.proc{|j| j['payload']['args']==['Jason']}.queue(:jobs2)
+    # combination 2
+    ret = @cleaner.select {|j| j['payload']['args']==['Jason'] && j.queue?(:jobs2)}
     assert_equal 13, ret.size
   end
 

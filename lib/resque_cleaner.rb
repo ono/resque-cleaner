@@ -127,49 +127,39 @@ module Resque
         c
       end
 
-      # Returns Proc which you can add a useful condition easily.
-      # e.g.
-      # cleaner.clear &cleaner.proc.retried
-      #   #=> Clears all jobs retried.
-      # cleaner.select &cleaner.proc.after(10.days.ago).klass(EmailJob)
-      #   #=> Selects all EmailJob failed within 10 days.
-      # cleaner.select &cleaner.proc{|j| j["exception"]=="RunTimeError"}.klass(EmailJob)
-      #   #=> Selects all EmailJob failed with RunTimeError.
-      def proc(&block)
-        FilterProc.new(&block)
-      end
-
-      # Provides typical proc you can filter jobs.
-      class FilterProc < Proc
-        def retried
-          FilterProc.new {|job| self.call(job) && job['retried_at'].blank?}
+      # Exntends job(Hash instance) with some helper methods.
+      module FailedJobEx
+        # Returns true if the job has been already retried. Otherwise returns
+        # false.
+        def retried?
+          self['retried_at'].blank?
         end
-        alias :requeued :retried
+        alias :requeued? :retried?
 
-        def before(time)
+        # Returns true if the job processed(failed) before the given time.
+        # Otherwise returns false.
+        # You can pass Time object or String.
+        def before?(time)
           time = Time.parse(time) if time.is_a?(String)
-          FilterProc.new {|job| self.call(job) && Time.parse(job['failed_at']) <= time}
+          Time.parse(self['failed_at']) < time
         end
 
-        def after(time)
+        # Returns true if the job processed(failed) after the given time.
+        # Otherwise returns false.
+        # You can pass Time object or String.
+        def after?(time)
           time = Time.parse(time) if time.is_a?(String)
-          FilterProc.new {|job| self.call(job) && Time.parse(job['failed_at']) >= time}
+          Time.parse(self['failed_at']) >= time
         end
 
-        def klass(klass_or_name)
-          FilterProc.new {|job| self.call(job) && job["payload"]["class"] == klass_or_name.to_s}
+        # Returns true if the class of the job matches. Otherwise returns false.
+        def klass?(klass_or_name)
+          self["payload"]["class"] == klass_or_name.to_s
         end
 
-        def queue(queue)
-          FilterProc.new {|job| self.call(job) && job["queue"] == queue.to_s}
-        end
-
-        def self.new(&block)
-          if block
-            super
-          else
-            super {|job| true}
-          end
+        # Returns true if the queue of the job matches. Otherwise returns false.
+        def queue?(queue)
+          self["queue"] == queue.to_s
         end
       end
 
@@ -209,11 +199,12 @@ module Resque
           end
         end
 
-        # wraps Resque's all and returns always array.
+        # Wraps Resque's all and returns always array.
         def all(index=0,count=1)
           jobs = @cleaner.failure.all( index, count)
           jobs = [] unless jobs
           jobs = [jobs] unless jobs.is_a?(Array)
+          jobs.each{|j| j.extend FailedJobEx}
           jobs
         end
 
