@@ -76,7 +76,7 @@ block evaluates true.
 
 e.g. Retry only jobs with some arguments:
 
-    > cleaner.requeue{ |j| j["payload"]["args"].size > 0}
+    > cleaner.requeue {|j| j["payload"]["args"].size > 0}
 
 The job hash is extended with a module which defines some useful methods. You
 can use it in the blcok.
@@ -87,13 +87,13 @@ e.g. Retry only jobs entried within a day:
 
 e.g. Retry EmailJob entried with arguments within 3 days:
 
-    > cleaner.requeue {|j| j["payload"]["args"]>0 && j.after?(3.days.ago) && j.klass?(EmailJob)}
+    > cleaner.requeue {|j| j.after?(3.days.ago) && j.klass?(EmailJob) && j["payload"]["args"].size>0}
 
 See Helper Methods section bellow for more information.
 
 NOTE:
 [1.day.ago](https://github.com/rails/rails/blob/master/activesupport/lib/active_support/core_ext/numeric/time.rb)
-is not in standard library. It is equivalent to `Time.now - 60*60*24*3`.
+is not in standard library. Using it for making explanation more understandable. It is equivalent to `Time.now - 60*60*24*3`.
 
 **Clear Jobs**
 
@@ -116,9 +116,24 @@ some examples:
 **Retry and Clear Jobs**
 
 You can retry(requeue) and clear failed jobs at the same time; just pass true
-as an argument. e.g. Retry EmailJob and remove from failed jobs.
+as an argument. 
+
+e.g. Retry EmailJob and remove from failed jobs:
 
     > cleaner.requeue(true) {|j| j.klass?(EmailJob)}
+
+**Retry with other queue**
+
+You can requeue failed jobs into other queue. In this way, you can retry failed
+jobs without blocking jobs being entried by your service running in the live.
+
+e.g. Retry failed jobs on :retry queue
+
+    > cleaner.requeue(false, :queue => :retry)
+
+Don't forget to launch resque worker for the queue.
+
+    % QUEUE=retry rake resque:work
 
 **Select Jobs**
 
@@ -130,7 +145,7 @@ You can just select the jobs of course. Here are some examples:
 
 **Helper Methods**
 
-Here is a list of methods a job extended:
+Here is a list of methods a failed job ratained through ResqueCleaner has:
 
     retried?: returns true if the job has already been retried.
     requeued?: alias of retried?.
@@ -143,8 +158,7 @@ Here is a list of methods a job extended:
 Failed Job
 -----------
 
-I show a sample of failed job bellow; it might help you when you write a block for
-filtering failed jobs.
+Here is a sample of failed jobs:
 
     {"failed_at": "2009/03/13 00:00:00",
      "payload": {"args": ["Johnson"], "class": "BadJob"},
