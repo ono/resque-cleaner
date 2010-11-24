@@ -97,6 +97,15 @@ context "ResqueCleaner" do
     assert_equal 0, @cleaner.select.size
   end
 
+  test "#requeue with :queue option requeues the jobs to the queue" do
+    assert_equal 0, queue_size(:jobs,:jobs2,:retry)
+    requeued = @cleaner.requeue false, :queue => :retry
+    assert_equal 42, requeued
+    assert_equal 42, @cleaner.select.size # it doesn't clear jobs
+    assert_equal 0, queue_size(:jobs,:jobs2)
+    assert_equal 42, queue_size(:retry)
+  end
+
   test "#clear_stale deletes failure jobs which is queued before the last x enqueued" do
     @cleaner.limiter.maximum = 10
     @cleaner.clear_stale

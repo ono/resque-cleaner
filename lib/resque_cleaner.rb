@@ -94,8 +94,9 @@ module Resque
       end
 
       # Retries every jobs for which block evaluates to true.
-      def requeue(clear_after_requeue=false, &block)
+      def requeue(clear_after_requeue=false, options={}, &block)
         requeued = 0
+        queue = options["queue"] || options[:queue]
         @limiter.lock do
           @limiter.jobs.each_with_index do |job,i|
             if !block_given? || block.call(job)
@@ -111,7 +112,7 @@ module Resque
                 redis.lset(:failed, @limiter.start_index+i, Resque.encode(job))
               end
 
-              Job.create(job['queue'], job['payload']['class'], *job['payload']['args'])
+              Job.create(queue||job['queue'], job['payload']['class'], *job['payload']['args'])
               requeued += 1
             end
           end
