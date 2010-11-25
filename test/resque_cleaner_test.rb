@@ -1,4 +1,4 @@
-require File.dirname(__FILE__) + '/test_helper'
+require File.expand_path(File.dirname(__FILE__) + '/test_helper')
 require 'time'
 context "ResqueCleaner" do
   def create_and_process_jobs(queue,worker,num,date,job,*args)
