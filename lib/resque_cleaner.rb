@@ -133,7 +133,7 @@ module Resque
         # Returns true if the job has been already retried. Otherwise returns
         # false.
         def retried?
-          self['retried_at'].blank?
+          !self['retried_at'].nil?
         end
         alias :requeued? :retried?
 

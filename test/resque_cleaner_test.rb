@@ -137,6 +137,11 @@ context "ResqueCleaner" do
     # combination 2
     ret = @cleaner.select {|j| j['payload']['args']==['Jason'] && j.queue?(:jobs2)}
     assert_equal 13, ret.size
+
+    # retried?
+    requeued = @cleaner.requeue{|j| j["payload"]["args"][0]=="Johnson"}
+    ret = @cleaner.select {|j| j.retried?}
+    assert_equal 1, ret.size
   end
 
   test "#stats_by_date returns stats grouped by date" do
