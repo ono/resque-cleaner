@@ -1,4 +1,7 @@
 require 'time'
+require 'resque'
+require 'resque/server'
+
 module Resque
   module Plugins
     # ResqueCleaner class provides useful functionalities to retry or clean
@@ -258,5 +261,5 @@ module Resque
   end
 end
 
-
+require 'resque_cleaner/server'
 
