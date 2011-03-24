@@ -1,2 +1,17 @@
-<h1>Failures by ResqueCleaner</h1>
+<link href="/cleaner/public/cleaner.css" media="screen" rel="stylesheet" type="text/css">
 
+<div class="cleaner">
+  <h1>Failures by ResqueCleaner</h1>
+  <table class="class_list">
+    <tr>
+      <th>Class</th>
+      <th>Failed</th>
+    </tr>
+    <% @stats.each do |klass,count| %>
+      <tr>
+        <td><%= klass %></td>
+        <td><%= count %></td>
+      </tr>
+    <% end %>
+  </table>
+</div>
