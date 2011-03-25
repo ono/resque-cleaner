@@ -1,18 +1,20 @@
 <link href="/cleaner/public/cleaner.css" media="screen" rel="stylesheet" type="text/css">
 
 <div class="cleaner">
-  <h1>Failed Classes</h1>
+  <div class="title clearfix">
+    <h1>Failed Classes</h1>
 
-  <div class="filter">
-    <form method="get">
-      <span class="time_filter">
-        From: <%= time_filter("filter_from","f",@from)%>
-      </span>
-      <span class="time_filter">
-        To: <%= time_filter("filter_to","t",@to)%>
-      </span>
-      <input type="submit" value="Filter" />
-    </form>
+    <div class="filter">
+      <form method="get">
+        <span class="time_filter">
+          From: <%= time_filter("filter_from","f",@from)%>
+        </span>
+        <span class="time_filter">
+          To: <%= time_filter("filter_to","t",@to)%>
+        </span>
+        <input type="submit" value="Filter" />
+      </form>
+    </div>
   </div>
   <table class="class_list">
     <tr>

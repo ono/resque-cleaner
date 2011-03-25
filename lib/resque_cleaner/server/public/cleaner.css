@@ -1,5 +1,19 @@
+
+#main .cleaner .title h1 { float: left }
+#main .cleaner .title .filter { float: left; margin: 12px 0 0 20px }
+
+
 #main .cleaner table.class_list { width: auto }
 #main .cleaner td.number { text-align: right }
-#main .cleaner tr.total { background: #ffe }
+#main .cleaner tr.total { border-top: 3px double #ccc}
 
 #main .cleaner form { float: none; margin: 0}
+
+#main .clearfix:after {
+  content: ".";
+  display: block;
+  height: 0;
+  clear: both;
+  visibility: hidden;
+}
+
