@@ -30,10 +30,13 @@ module ResqueCleaner
 
         get "/cleaner" do
           load_cleaner_filter
-          @stats = cleaner.stats_by_class{|j|
+          block = lambda{|j|
             (!@from || j.after?(hours_ago(@from))) &&
             (!@to || j.before?(hours_ago(@to)))
           }
+
+          @stats = cleaner.stats_by_class &block
+          @count = cleaner.select(&block).size
 
           erb File.read(ResqueCleaner::Server.erb_path('cleaner.erb'))
         end

@@ -1,13 +1,18 @@
 
 #main .cleaner .title h1 { float: left }
-#main .cleaner .title .filter { float: left; margin: 12px 0 0 20px }
 
+#main .cleaner .sub_header {color: #888; font-size: 80%; font-weight: bold}
+#main .cleaner .title .filter { float: left; margin: 15px 0 0 20px;}
+
+#main .cleaner .control_panel { margin: 10px 0 10px; padding: 5px; background: #eee; display: inline-block;}
 
 #main .cleaner table.class_list { width: auto }
 #main .cleaner td.number { text-align: right }
 #main .cleaner tr.total { border-top: 3px double #ccc}
 
 #main .cleaner form { float: none; margin: 0}
+
+#main .cleaner .warning { margin: 30px 0; padding: 10px; background: #fdd; display: inline-block; }
 
 #main .clearfix:after {
   content: ".";
