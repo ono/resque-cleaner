@@ -1,7 +1,7 @@
 <link href="/cleaner/public/cleaner.css" media="screen" rel="stylesheet" type="text/css">
 
 <div class="cleaner">
-  <h1>Failures by ResqueCleaner</h1>
+  <h1>Failed Classes</h1>
 
   <div class="filter">
     <form method="get">
@@ -19,11 +19,17 @@
       <th>Class</th>
       <th>Failed</th>
     </tr>
+    <% total = 0 %>
     <% @stats.each do |klass,count| %>
       <tr>
         <td><%= klass %></td>
         <td class="number"><%= count %></td>
       </tr>
+      <% total += count %>
     <% end %>
+    <tr class="total">
+      <td>Total</td>
+      <td class="number"><%= total%></td>
+    </tr>
   </table>
 </div>

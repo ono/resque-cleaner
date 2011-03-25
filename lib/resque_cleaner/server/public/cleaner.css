@@ -1,4 +1,5 @@
 #main .cleaner table.class_list { width: auto }
 #main .cleaner td.number { text-align: right }
+#main .cleaner tr.total { background: #ffe }
 
 #main .cleaner form { float: none; margin: 0}
