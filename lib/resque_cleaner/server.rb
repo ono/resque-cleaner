@@ -13,11 +13,27 @@ module ResqueCleaner
 
       base.class_eval do
         helpers do
-
+          def time_filter(id, name, value)
+            html = "<select id=\"#{id}\" name=\"#{name}\">"
+            html += "<option value=\"\">-</option>"
+            [1, 3, 6, 12, 24].each do |h|
+              selected = h.to_s == value ? 'selected="selected"' : ''
+              html += "<option #{selected} value=\"#{h}\">#{h} #{h==1 ? "hour" : "hours"} ago</option>"
+            end
+            [3, 7, 14, 28].each do |d|
+              selected = (d*24).to_s == value ? 'selected="selected"' : ''
+              html += "<option #{selected} value=\"#{d*24}\">#{d} days ago</option>"
+            end
+            html += "</select>"
+          end
         end
 
         get "/cleaner" do
-          @stats = cleaner.stats_by_class
+          load_cleaner_filter
+          @stats = cleaner.stats_by_class{|j|
+            (!@from || j.after?(hours_ago(@from))) &&
+            (!@to || j.before?(hours_ago(@to)))
+          }
 
           erb File.read(ResqueCleaner::Server.erb_path('cleaner.erb'))
         end
@@ -33,6 +49,15 @@ module ResqueCleaner
       @cleaner ||= Resque::Plugins::ResqueCleaner.new
       @cleaner.print_message = false
       @cleaner
+    end
+
+    def load_cleaner_filter
+      @from = params[:f]=="" ? nil : params[:f]
+      @to = params[:t]=="" ? nil : params[:t]
+    end
+
+    def hours_ago(h)
+      Time.now - h.to_i*60*60
     end
     Resque::Server.tabs << 'Cleaner'
   end

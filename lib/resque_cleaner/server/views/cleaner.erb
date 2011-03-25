@@ -2,6 +2,18 @@
 
 <div class="cleaner">
   <h1>Failures by ResqueCleaner</h1>
+
+  <div class="filter">
+    <form method="get">
+      <span class="time_filter">
+        From: <%= time_filter("filter_from","f",@from)%>
+      </span>
+      <span class="time_filter">
+        To: <%= time_filter("filter_to","t",@to)%>
+      </span>
+      <input type="submit" value="Filter" />
+    </form>
+  </div>
   <table class="class_list">
     <tr>
       <th>Class</th>
@@ -10,7 +22,7 @@
     <% @stats.each do |klass,count| %>
       <tr>
         <td><%= klass %></td>
-        <td><%= count %></td>
+        <td class="number"><%= count %></td>
       </tr>
     <% end %>
   </table>
