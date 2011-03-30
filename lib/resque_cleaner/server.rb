@@ -70,7 +70,7 @@ module ResqueCleaner
             (!@klass || j.klass?(@klass))
           }
 
-          @failed = cleaner.select(&block)
+          @failed = cleaner.select(&block).reverse
 
           @klasses = cleaner.stats_by_class.keys
           @count = cleaner.select(&block).size
