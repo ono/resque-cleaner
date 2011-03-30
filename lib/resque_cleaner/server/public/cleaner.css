@@ -2,9 +2,8 @@
 #main .cleaner .title h1 { float: left }
 
 #main .cleaner .sub_header {color: #888; font-size: 80%; font-weight: bold}
-#main .cleaner .title .filter { float: left; margin: 15px 0 0 20px;}
 
-#main .cleaner .control_panel { margin: 10px 0 10px; padding: 5px; background: #eee; display: inline-block;}
+#main .cleaner .control_panel { margin: 5px 0 10px; padding: 5px; background: #eee; display: inline-block;}
 
 #main .cleaner table.class_list { width: auto }
 #main .cleaner td.number { text-align: right }

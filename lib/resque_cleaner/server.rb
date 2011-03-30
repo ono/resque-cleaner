@@ -26,6 +26,16 @@ module ResqueCleaner
             end
             html += "</select>"
           end
+
+          def class_filter(id, name, klasses, value)
+            html = "<select id=\"#{id}\" name=\"#{name}\">"
+            html += "<option value=\"\">-</option>"
+            klasses.each do |k|
+              selected = k == value ? 'selected="selected"' : ''
+              html += "<option #{selected} value=\"#{k}\">#{k}</option>"
+            end
+            html += "</select>"
+          end
         end
 
         get "/cleaner" do
@@ -62,7 +72,7 @@ module ResqueCleaner
 
           @failed = cleaner.select(&block)
 
-          @stats = cleaner.stats_by_class &block
+          @klasses = cleaner.stats_by_class.keys
           @count = cleaner.select(&block).size
 
           erb File.read(ResqueCleaner::Server.erb_path('cleaner_list.erb'))

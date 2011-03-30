@@ -4,9 +4,14 @@
 <div class="cleaner">
   <div class="title clearfix">
     <h1>Failed Jobs</h1>
+  </div>
 
-    <div class="filter sub_header">
+  <div class="clearfix">
+    <div class="control_panel sub_header">
       <form method="get">
+        <span class="class_filter">
+          Class: <%= class_filter("filter_class","c",@klasses,@klass)%>
+        </span>
         <span class="time_filter">
           From: <%= time_filter("filter_from","f",@from)%>
         </span>
@@ -19,16 +24,18 @@
   </div>
 
   <% if @count > 0 %>
-    <div class="control_panel sub_header">
-      <form method="post" action="cleaner?f=<%=@from%>&t=<%=@to%>">
-        Action:
-        <select name="action">
-          <option value="clear">Clear</option>
-          <option value="retry_and_claer">Retry and Clear</option>
-          <option value="retry">Retry</option>
-        </select>
-        <input type="submit" onclick="return confirm('Are you sure?')" value="Execute" />
-      </form>
+    <div class="clearfix">
+      <div class="control_panel sub_header">
+        <form method="post" action="cleaner?f=<%=@from%>&t=<%=@to%>">
+          Action:
+          <select name="action">
+            <option value="clear">Clear</option>
+            <option value="retry_and_claer">Retry and Clear</option>
+            <option value="retry">Retry</option>
+          </select>
+          <input type="submit" onclick="return confirm('Are you sure?')" value="Execute" />
+        </form>
+      </div>
     </div>
   <% end %>
 
@@ -82,22 +89,6 @@
       </li>
     <%end%>
   </ul>
-  <table class="class_list">
-    <tr>
-      <th>Class</th>
-      <th>Failed</th>
-    </tr>
-    <% @stats.each do |klass,count| %>
-      <tr>
-        <td><%= klass %></td>
-        <td class="number"><%= count %></td>
-      </tr>
-    <% end %>
-    <tr class="total">
-      <td>Total</td>
-      <td class="number"><%= @count%></td>
-    </tr>
-  </table>
 
   <% if @cleaner.limiter.on? %>
   <div class="warning">
