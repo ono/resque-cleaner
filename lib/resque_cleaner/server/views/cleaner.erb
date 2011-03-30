@@ -3,48 +3,37 @@
 <div class="cleaner">
   <div class="title clearfix">
     <h1>Job Classes Failed</h1>
-
-    <div class="filter sub_header">
-      <form method="get">
-        <span class="time_filter">
-          From: <%= time_filter("filter_from","f",@from)%>
-        </span>
-        <span class="time_filter">
-          To: <%= time_filter("filter_to","t",@to)%>
-        </span>
-        <input type="submit" value="Filter" />
-      </form>
-    </div>
   </div>
-
-  <% if @count > 0 %>
-    <div class="control_panel sub_header">
-      <form method="post" action="cleaner?f=<%=@from%>&t=<%=@to%>">
-        Action:
-        <select name="action">
-          <option value="clear">Clear</option>
-          <option value="retry_and_claer">Retry and Clear</option>
-          <option value="retry">Retry</option>
-        </select>
-        <input type="submit" onclick="return confirm('Are you sure?')" value="Execute" />
-      </form>
-    </div>
-  <% end %>
 
   <table class="class_list">
     <tr>
       <th>Class</th>
       <th>Failed</th>
+      <th>In last 1 hour</th>
+      <th>In last 3 hours</th>
+      <th>In last 24 hours</th>
+      <th>In last 3 days</th>
+      <th>In last 7 days</th>
     </tr>
     <% @stats.each do |klass,count| %>
       <tr>
         <td><%= klass %></td>
-        <td class="number"><%= count %></td>
+        <td class="number"><a href="/cleaner_list?c=<%=klass%>"><%= count["total"] %></a></td>
+        <td class="number"><a href="/cleaner_list?c=<%=klass%>&f=1"><%= count["1h"] %></a></td>
+        <td class="number"><a href="/cleaner_list?c=<%=klass%>&f=3"><%= count["3h"] %></a></td>
+        <td class="number"><a href="/cleaner_list?c=<%=klass%>&f=24"><%= count["1d"] %></a></td>
+        <td class="number"><a href="/cleaner_list?c=<%=klass%>&f=72"><%= count["3d"] %></a></td>
+        <td class="number"><a href="/cleaner_list?c=<%=klass%>&f=168"><%= count["7d"] %></a></td>
       </tr>
     <% end %>
     <tr class="total">
       <td>Total</td>
-      <td class="number"><%= @count%></td>
+      <td class="number"><a href="/cleaner_list"><%= @total["total"] %></a></td>
+      <td class="number"><a href="/cleaner_list?f=1"><%= @total["1h"] %></a></td>
+      <td class="number"><a href="/cleaner_list?f=3"><%= @total["3h"] %></a></td>
+      <td class="number"><a href="/cleaner_list?f=24"><%= @total["1d"] %></a></td>
+      <td class="number"><a href="/cleaner_list?f=72"><%= @total["3d"] %></a></td>
+      <td class="number"><a href="/cleaner_list?f=168"><%= @total["7d"] %></a></td>
     </tr>
   </table>
 

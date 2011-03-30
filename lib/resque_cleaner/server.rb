@@ -30,15 +30,40 @@ module ResqueCleaner
 
         get "/cleaner" do
           load_cleaner_filter
+
+          @jobs = cleaner.select
+          @stats, @total = {}, {"total" => 0, "1h" => 0, "3h" => 0, "1d" => 0, "3d" => 0, "7d" => 0}
+          @jobs.each do |job|
+            klass = job["payload"]["class"]
+            failed_at = Time.parse job["failed_at"]
+
+            @stats[klass] ||= {"total" => 0, "1h" => 0, "3h" => 0, "1d" => 0, "3d" => 0, "7d" => 0}
+            items = [@stats[klass],@total]
+
+            items.each{|a| a["total"] += 1}
+            items.each{|a| a["1h"] += 1} if failed_at >= hours_ago(1)
+            items.each{|a| a["3h"] += 1} if failed_at >= hours_ago(3)
+            items.each{|a| a["1d"] += 1} if failed_at >= hours_ago(24)
+            items.each{|a| a["3d"] += 1} if failed_at >= hours_ago(24*3)
+            items.each{|a| a["7d"] += 1} if failed_at >= hours_ago(24*7)
+          end
+
+          erb File.read(ResqueCleaner::Server.erb_path('cleaner.erb'))
+        end
+
+        get "/cleaner_list" do
+          load_cleaner_filter
+
           block = lambda{|j|
             (!@from || j.after?(hours_ago(@from))) &&
-            (!@to || j.before?(hours_ago(@to)))
+            (!@to || j.before?(hours_ago(@to))) &&
+            (!@klass || j.klass?(@klass))
           }
 
           @stats = cleaner.stats_by_class &block
           @count = cleaner.select(&block).size
 
-          erb File.read(ResqueCleaner::Server.erb_path('cleaner.erb'))
+          erb File.read(ResqueCleaner::Server.erb_path('cleaner_list.erb'))
         end
 
         get /cleaner\/public\/([a-z]+\.[a-z]+)/ do
@@ -57,6 +82,7 @@ module ResqueCleaner
     def load_cleaner_filter
       @from = params[:f]=="" ? nil : params[:f]
       @to = params[:t]=="" ? nil : params[:t]
+      @klass = params[:c]=="" ? nil : params[:c]
     end
 
     def hours_ago(h)
