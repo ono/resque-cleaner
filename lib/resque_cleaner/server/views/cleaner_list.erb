@@ -1,8 +1,9 @@
 <link href="/cleaner/public/cleaner.css" media="screen" rel="stylesheet" type="text/css">
 
+<!-- Many code was copied from failed.erb of the original resque -->
 <div class="cleaner">
   <div class="title clearfix">
-    <h1>Job Classes Failed</h1>
+    <h1>Failed Jobs</h1>
 
     <div class="filter sub_header">
       <form method="get">
@@ -31,6 +32,56 @@
     </div>
   <% end %>
 
+  <% start = 0 %>
+  <% failed = @failed %>
+  <% index = 0 %>
+  <ul class='failed'>
+    <%for job in failed%>
+      <% index += 1 %>
+      <li>
+        <dl>
+          <% if job.nil? %>
+          <dt>Error</dt>
+          <dd>Job <%= index%> could not be parsed; perhaps it contains invalid JSON?</dd>
+          <% else %>
+          <dt>Worker</dt>
+          <dd>
+            <a href="<%= u(:workers, job['worker']) %>"><%= job['worker'].split(':')[0...2].join(':') %></a> on <b class='queue-tag'><%= job['queue'] %></b > at <b><span class="time"><%= job['failed_at'] %></span></b>
+            <% if job['retried_at'] %>
+              <div class='retried'>
+                Retried <b><span class="time"><%= job['retried_at'] %></span></b>
+                <a href="<%= u "failed/remove/#{start + index - 1}" %>" class="remove" rel="remove">Remove</a>
+              </div>
+            <% else %>
+              <div class='controls'>
+                <a href="<%= u "failed/requeue/#{start + index - 1}" %>" rel="retry">Retry</a>
+                or
+                <a href="<%= u "failed/remove/#{start + index - 1}" %>" rel="remove">Remove</a>
+              </div>
+            <% end %>
+          </dd>
+          <dt>Class</dt>
+          <dd><code><%= job['payload'] ? job['payload']['class'] : 'nil' %></code></dd>
+          <dt>Arguments</dt>
+          <dd><pre><%=h job['payload'] ? show_args(job['payload']['args']) : 'nil' %></pre></dd>
+          <dt>Exception</dt>
+          <dd><code><%= job['exception'] %></code></dd>
+          <dt>Error</dt>
+          <dd class='error'>
+            <% if job['backtrace'] %>
+              <a href="#" class="backtrace"><%= h(job['error']) %></a>
+              <pre style='display:none'><%=h job['backtrace'].join("\n") %></pre>
+            <% else %>
+              <%=h job['error'] %>
+            <% end %>
+          </dd>
+          <% end %>
+        </dl>
+        <div class='r'>
+        </div>
+      </li>
+    <%end%>
+  </ul>
   <table class="class_list">
     <tr>
       <th>Class</th>
