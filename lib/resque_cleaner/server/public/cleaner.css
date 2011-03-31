@@ -20,4 +20,34 @@
   clear: both;
   visibility: hidden;
 }
+#main .cleaner ul.failed {
+  margin-bottom: 10px
+}
+
+#main .cleaner .list_info{
+  color: #999; text-align: center;
+}
+#main .cleaner .list_info a{
+  color: #666
+}
+#main .cleaner .list_info .list_summary{
+  vertical-align: baseline;
+  display: inline-block;
+  margin: 0; padding:0;
+}
+#main .cleaner ul.pagination {
+  display: inline-block;
+  vertical-align: baseline;
+  margin:0; padding:0;
+}
+#main .cleaner ul.pagination li {
+  list-style:none; float: left; padding: 0 3px;
+}
+#main .cleaner ul.pagination li.current {
+  color: #333; font-weight: bold;
+}
+#main .cleaner ul.pagination li.summary{
+  padding-right: 10px
+}
+
 

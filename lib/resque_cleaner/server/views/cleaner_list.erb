@@ -40,8 +40,10 @@
   <% end %>
 
   <% start = 0 %>
-  <% failed = @failed %>
+  <% failed = @paginate.paginated_jobs%>
   <% index = 0 %>
+
+  <%= erb File.read(ResqueCleaner::Server.erb_path("_paginate.erb")) %>
   <ul class='failed'>
     <%for job in failed%>
       <% index += 1 %>
@@ -89,6 +91,7 @@
       </li>
     <%end%>
   </ul>
+  <%= erb File.read(ResqueCleaner::Server.erb_path("_paginate.erb")) %>
 
   <% if @cleaner.limiter.on? %>
   <div class="warning">
