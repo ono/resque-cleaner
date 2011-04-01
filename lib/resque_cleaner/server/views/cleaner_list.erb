@@ -26,9 +26,9 @@
   <% if @count > 0 %>
     <div class="clearfix">
       <div class="control_panel sub_header">
-        <form method="post" id="exec" action="cleaner_exec?f=<%=@from%>&t=<%=@to%>&p=<%=@page%>">
-          <select name="action">
-            <option value="" selected="selected">-- Select Action --</option>
+        <form method="post" id="exec" action="cleaner_exec?k=<%=@klass%>&f=<%=@from%>&t=<%=@to%>&p=<%=@paginate.page%>">
+          <select id="form_action" name="action">
+            <option id="default_option" value="" selected="selected">-- Select Action --</option>
             <option value="clear">Clear</option>
             <option value="retry_and_claer">Retry and Clear</option>
             <option value="retry">Retry</option>
@@ -36,7 +36,10 @@
           <a href="#" id="select_all">select all</a>
           <a href="#" id="reset_all">reset</a>
 
-          <input type="checkbox" id="select_all_pages" />Select all <%=@count%> jobs
+          <% if @paginate.max_page > 1 %>
+            <input type="checkbox" name="select_all_pages" value="1" id="select_all_pages" />Select all <%=@count%> jobs
+          <% end %>
+          <input type="hidden" name="sha1" id="sha1_list" />
 
         </form>
       </div>
@@ -68,13 +71,6 @@
               <% if job['retried_at'] %>
                 <div class='retried'>
                   Retried <b><span class="time"><%= job['retried_at'] %></span></b>
-                  <a href="<%= u "failed/remove/#{start + index - 1}" %>" class="remove" rel="remove">Remove</a>
-                </div>
-              <% else %>
-                <div class='controls'>
-                  <a href="<%= u "failed/requeue/#{start + index - 1}" %>" rel="retry">Retry</a>
-                  or
-                  <a href="<%= u "failed/remove/#{start + index - 1}" %>" rel="remove">Remove</a>
                 </div>
               <% end %>
             </dd>
@@ -138,7 +134,37 @@
       }
       return false;
     });
+
+    $('#form_action').change( function() {
+      if ($('#form_action option:selected').val()=='') return;
+
+      if ($('#select_all_pages:checked, .failed input:checked').length==0) {
+        alert('Please select jobs.');
+        $('#default_option').attr('selected','selected');
+        return false;
+      }
+
+      if (!confirm('Do you really want to proceed?')) {
+        $('#default_option').attr('selected','selected');
+        return false;
+      }
+
+      if ($('#select_all_pages:checked').length==0) {
+        setSha1();
+      }
+      $('#exec').submit();
+    });
   });
+
+  function setSha1() {
+    var sha1 = "";
+    $('.failed input:checked').each( function() {
+      if (sha1.length>0) sha1 += ",";
+      sha1 += $(this).attr("id");
+    });
+
+    $('#sha1_list').val(sha1);
+  }
 
   function updateCheckboxStaus() {
     if ($('#select_all_pages:checked').length==1) {
