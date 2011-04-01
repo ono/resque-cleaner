@@ -60,7 +60,7 @@ module ResqueCleaner
     end
 
     def self.included(base)
-
+      require 'digest/sha1'
       base.class_eval do
         helpers do
           def time_filter(id, name, value)

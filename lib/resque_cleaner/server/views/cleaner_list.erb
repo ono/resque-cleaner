@@ -26,14 +26,18 @@
   <% if @count > 0 %>
     <div class="clearfix">
       <div class="control_panel sub_header">
-        <form method="post" action="cleaner?f=<%=@from%>&t=<%=@to%>">
-          Action:
+        <form method="post" id="exec" action="cleaner_exec?f=<%=@from%>&t=<%=@to%>&p=<%=@page%>">
           <select name="action">
+            <option value="" selected="selected">-- Select Action --</option>
             <option value="clear">Clear</option>
             <option value="retry_and_claer">Retry and Clear</option>
             <option value="retry">Retry</option>
           </select>
-          <input type="submit" onclick="return confirm('Are you sure?')" value="Execute" />
+          <a href="#" id="select_all">select all</a>
+          <a href="#" id="reset_all">reset</a>
+
+          <input type="checkbox" id="select_all_pages" />Select all <%=@count%> jobs
+
         </form>
       </div>
     </div>
@@ -43,56 +47,63 @@
   <% failed = @paginate.paginated_jobs%>
   <% index = 0 %>
 
-  <%= erb File.read(ResqueCleaner::Server.erb_path("_paginate.erb")) %>
-  <ul class='failed'>
-    <%for job in failed%>
-      <% index += 1 %>
-      <li>
-        <dl>
-          <% if job.nil? %>
-          <dt>Error</dt>
-          <dd>Job <%= index%> could not be parsed; perhaps it contains invalid JSON?</dd>
-          <% else %>
-          <dt>Worker</dt>
-          <dd>
-            <a href="<%= u(:workers, job['worker']) %>"><%= job['worker'].split(':')[0...2].join(':') %></a> on <b class='queue-tag'><%= job['queue'] %></b > at <b><span class="time"><%= job['failed_at'] %></span></b>
-            <% if job['retried_at'] %>
-              <div class='retried'>
-                Retried <b><span class="time"><%= job['retried_at'] %></span></b>
-                <a href="<%= u "failed/remove/#{start + index - 1}" %>" class="remove" rel="remove">Remove</a>
-              </div>
+  <% if @paginate.max_page > 0 %>
+    <%= erb File.read(ResqueCleaner::Server.erb_path("_paginate.erb")) %>
+    <ul class='failed'>
+      <%for job in failed%>
+        <% index += 1 %>
+        <li>
+          <dl>
+            <% if job.nil? %>
+            <dt>Error</dt>
+            <dd>Job <%= index%> could not be parsed; perhaps it contains invalid JSON?</dd>
             <% else %>
-              <div class='controls'>
-                <a href="<%= u "failed/requeue/#{start + index - 1}" %>" rel="retry">Retry</a>
-                or
-                <a href="<%= u "failed/remove/#{start + index - 1}" %>" rel="remove">Remove</a>
-              </div>
+            <dt>
+              <input type="checkbox" id="<%=Digest::SHA1.hexdigest job.to_json %>" />
+            </dt>
+            <dd>&nbsp;</dd>
+            <dt>Worker</dt>
+            <dd>
+              <a href="<%= u(:workers, job['worker']) %>"><%= job['worker'].split(':')[0...2].join(':') %></a> on <b class='queue-tag'><%= job['queue'] %></b > at <b><span class="time"><%= job['failed_at'] %></span></b>
+              <% if job['retried_at'] %>
+                <div class='retried'>
+                  Retried <b><span class="time"><%= job['retried_at'] %></span></b>
+                  <a href="<%= u "failed/remove/#{start + index - 1}" %>" class="remove" rel="remove">Remove</a>
+                </div>
+              <% else %>
+                <div class='controls'>
+                  <a href="<%= u "failed/requeue/#{start + index - 1}" %>" rel="retry">Retry</a>
+                  or
+                  <a href="<%= u "failed/remove/#{start + index - 1}" %>" rel="remove">Remove</a>
+                </div>
+              <% end %>
+            </dd>
+            <dt>Class</dt>
+            <dd><code><%= job['payload'] ? job['payload']['class'] : 'nil' %></code></dd>
+            <dt>Arguments</dt>
+            <dd><pre><%=h job['payload'] ? show_args(job['payload']['args']) : 'nil' %></pre></dd>
+            <dt>Exception</dt>
+            <dd><code><%= job['exception'] %></code></dd>
+            <dt>Error</dt>
+            <dd class='error'>
+              <% if job['backtrace'] %>
+                <a href="#" class="backtrace"><%= h(job['error']) %></a>
+                <pre style='display:none'><%=h job['backtrace'].join("\n") %></pre>
+              <% else %>
+                <%=h job['error'] %>
+              <% end %>
+            </dd>
             <% end %>
-          </dd>
-          <dt>Class</dt>
-          <dd><code><%= job['payload'] ? job['payload']['class'] : 'nil' %></code></dd>
-          <dt>Arguments</dt>
-          <dd><pre><%=h job['payload'] ? show_args(job['payload']['args']) : 'nil' %></pre></dd>
-          <dt>Exception</dt>
-          <dd><code><%= job['exception'] %></code></dd>
-          <dt>Error</dt>
-          <dd class='error'>
-            <% if job['backtrace'] %>
-              <a href="#" class="backtrace"><%= h(job['error']) %></a>
-              <pre style='display:none'><%=h job['backtrace'].join("\n") %></pre>
-            <% else %>
-              <%=h job['error'] %>
-            <% end %>
-          </dd>
-          <% end %>
-        </dl>
-        <div class='r'>
-        </div>
-      </li>
-    <%end%>
-  </ul>
-  <%= erb File.read(ResqueCleaner::Server.erb_path("_paginate.erb")) %>
-
+          </dl>
+          <div class='r'>
+          </div>
+        </li>
+      <%end%>
+    </ul>
+    <%= erb File.read(ResqueCleaner::Server.erb_path("_paginate.erb")) %>
+  <% else %>
+    Clean!
+  <% end %>
   <% if @cleaner.limiter.on? %>
   <div class="warning">
     <p>
@@ -109,3 +120,34 @@
   <% end %>
 </div>
 
+<script>
+  $(document).ready(function(){
+    $('#select_all_pages').click(function() {
+      updateCheckboxStaus();
+    });
+
+    $('#select_all').click(function() {
+      if (!$(this).hasClass('disabled')) {
+        $('.failed input').attr('checked','checked');
+      }
+      return false;
+    });
+    $('#reset_all').click(function() {
+      if (!$(this).hasClass('disabled')) {
+        $('.failed input').removeAttr('checked');
+      }
+      return false;
+    });
+  });
+
+  function updateCheckboxStaus() {
+    if ($('#select_all_pages:checked').length==1) {
+      $('#exec a').addClass('disabled');
+      $('.failed input').attr('disabled','disabled');
+    } else {
+      $('#exec a').removeClass('disabled');
+      $('.failed input').removeAttr('disabled');
+    }
+  };
+
+</script>

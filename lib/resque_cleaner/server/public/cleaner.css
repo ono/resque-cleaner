@@ -3,7 +3,15 @@
 
 #main .cleaner .sub_header {color: #888; font-size: 80%; font-weight: bold}
 
-#main .cleaner .control_panel { margin: 5px 0 10px; padding: 5px; background: #eee; display: inline-block;}
+#main .cleaner .control_panel { 
+  margin: 5px 0 10px; padding: 5px; background: #eee; display: inline-block;
+  -webkit-border-radius:5px; border:1px solid #ccc;
+}
+
+#main .cleaner #exec { color: black; }
+#main .cleaner #exec select { margin-right: 20px }
+#main .cleaner #exec a { margin-right: 5px}
+#main .cleaner #exec a.disabled { color: #aaa}
 
 #main .cleaner table.class_list { width: auto }
 #main .cleaner td.number { text-align: right }
