@@ -131,6 +131,36 @@ module ResqueCleaner
           erb File.read(ResqueCleaner::Server.erb_path('cleaner_list.erb'))
         end
 
+        post "/cleaner_exec" do
+          load_cleaner_filter
+
+          @sha1 = nil
+          if params[:select_all_pages]!="1"
+            @sha1 = {}
+            params[:sha1].split(",").each do |s|
+              @sha1[s] = true
+            end
+          end
+
+          block = lambda{|j|
+            (!@from || j.after?(hours_ago(@from))) &&
+            (!@to || j.before?(hours_ago(@to))) &&
+            (!@klass || j.klass?(@klass))
+            (!@sha1 || @sha1[Digest::SHA1.hexdigest(j.to_json)])
+          }
+
+          count = 
+            case params[:action]
+            when "clear" then cleaner.clear(&block)
+            when "retry_and_clear" then cleaner.requeue(true,&block)
+            when "retry" then cleaner.requeue(false,{},&block)
+            end
+
+          @msg = "processed #{count} jobs."
+          @url = "cleaner_list?c=#{@klass}&f=#{@from}&t=#{@to}"
+          erb File.read(ResqueCleaner::Server.erb_path('cleaner_exec.erb'))
+        end
+
         get /cleaner\/public\/([a-z]+\.[a-z]+)/ do
           send_file ResqueCleaner::Server.public_path(params[:captures].first)
         end

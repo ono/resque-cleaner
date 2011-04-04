@@ -26,11 +26,15 @@
   <% if @count > 0 %>
     <div class="clearfix">
       <div class="control_panel sub_header">
-        <form method="post" id="exec" action="cleaner_exec?k=<%=@klass%>&f=<%=@from%>&t=<%=@to%>&p=<%=@paginate.page%>">
+        <form method="post" id="exec" action="/cleaner_exec">
+          <input type="hidden" name="c" value="<%=@klass%>" />
+          <input type="hidden" name="f" value="<%=@from%>" />
+          <input type="hidden" name="t" value="<%=@to%>" />
+          <input type="hidden" name="p" value="<%=@paginate.page%>" />
           <select id="form_action" name="action">
             <option id="default_option" value="" selected="selected">-- Select Action --</option>
             <option value="clear">Clear</option>
-            <option value="retry_and_claer">Retry and Clear</option>
+            <option value="retry_and_clear">Retry and Clear</option>
             <option value="retry">Retry</option>
           </select>
           <a href="#" id="select_all">select all</a>
