@@ -37,9 +37,9 @@ You have to load ResqueCleaner to enable the Cleaner tab.
 Console
 -------
 
-Hopefully the situation of your failed jobs are simple enough to get figured out through
-web-interface. But, if not, a powerful filtering feature of ResqueCleaner may help
-you to figure it out from your console(irb).
+Hopefully a situation of your failed jobs is simple enough to get figured out through
+the web interface. But, if not, a powerful filtering feature of ResqueCleaner may help
+you to understand what is going on with your console(irb).
 
 **Create Instance**
 
