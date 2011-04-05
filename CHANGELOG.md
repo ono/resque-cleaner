@@ -1,7 +1,11 @@
+## 0.2.0 (2011-04-06)
+
+* Extended with resque-web
+
 ## 0.1.1 (2010-12-30)
 
-* Fix for ruby 1.9.2
-* Fix a bug on #retried? method
+* Fixed for ruby 1.9.2
+* Fixed a bug on #retried? method
 
 ## 0.1.0 (2010-11-24)
 
