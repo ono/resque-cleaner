@@ -5,7 +5,7 @@ module ResqueCleaner
 
     begin
       require 'yajl/json_gem'
-    rescue
+    rescue Exception
       require 'json'
     end
 
