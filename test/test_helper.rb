@@ -120,3 +120,20 @@ class BadJobWithSyntaxError
     raise SyntaxError, "Extra Bad job!"
   end
 end
+
+#
+# helper methods
+#
+
+def create_and_process_jobs(queue,worker,num,date,job,*args)
+  Timecop.freeze(date) do
+    num.times do
+      Resque::Job.create(queue, job, *args)
+    end
+    worker.work(0)
+  end
+end
+
+def queue_size(*queues)
+  queues.inject(0){|sum,queue| sum + Resque.size(queue).to_i}
+end
