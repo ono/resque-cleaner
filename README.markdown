@@ -8,15 +8,12 @@ Description
 -----------
 
 ResqueCleaner is a [Resque](https://github.com/defunkt/resque) plugin which
-helps you to deal with failed jobs on Resque by:
+aims to help you to clean up failed jobs on Resque by:
 
 * Showing stats of failed jobs
 * Retrying failed jobs
 * Removing failed jobs
 * Filtering failed jobs
-
-Although ResqueCleaner has not integrated with Resque's web-based interface yet,
-it is pretty easy to use on irb(console).
 
 
 Installation
@@ -27,8 +24,22 @@ Install as a gem:
     $ gem install resque-cleaner
 
 
-Usage
------
+Resque-Web integration
+----------------------
+
+![Screen 1](https://github.com/ono/resque-cleaner/raw/master/misc/resque-cleaner-main.png)
+![Screen 2](https://github.com/ono/resque-cleaner/raw/master/misc/resque-cleaner-list.png)
+
+You have to load ResqueCleaner to enable the Cleaner tab.
+
+    require 'resque-cleaner'
+
+Console
+-------
+
+Hopefully the situation of your failed jobs are simple enough to get figured out through
+web-interface. But, if not, a powerful filtering feature of ResqueCleaner may help
+you to figure it out from your console(irb).
 
 **Create Instance**
 
@@ -234,11 +245,4 @@ application; it should be quick even if there are huge number of failed jobs.
     > cleaner.limiter.on?
     => false
 
-TODO
-----
-
-* Integration with Resque's sinatra based front end.
-* More stats.
-
-Any suggestion or idea are welcomed.
 
