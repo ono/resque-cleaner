@@ -2,6 +2,13 @@
 # Structure has been borrowed from ResqueScheduler.
 module ResqueCleaner
   module Server
+
+    begin
+      require 'yajl/json_gem'
+    rescue
+      require 'json'
+    end
+
     def self.erb_path(filename)
       File.join(File.dirname(__FILE__), 'server', 'views', filename)
     end
