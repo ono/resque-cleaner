@@ -104,20 +104,6 @@
   <% else %>
     Clean!
   <% end %>
-  <% if @cleaner.limiter.on? %>
-  <div class="warning">
-    <p>
-    There are more than <%= @cleaner.limiter.maximum%> jobs. ResqueCleaner handles only recent <%= @cleaner.limiter.maximum %> jobs because of performance concern.
-    </p>
-    <p>
-      <form method="post" action="cleaner?f=<%=@from%>&t=<%=@to%>">
-        <input type="hidden" value="clear_stale" />
-        <input type="submit" onclick="return confirm('Are you sure?')" value="Clear all jobs older than <%= @cleaner.limiter.count %>th job."/>
-        (<%= @cleaner.failure.count - @cleaner.limiter.maximum %> jobs)
-      </form>
-    </p>
-  </div>
-  <% end %>
 </div>
 
 <script>

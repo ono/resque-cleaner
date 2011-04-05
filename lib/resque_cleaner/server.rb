@@ -161,6 +161,11 @@ module ResqueCleaner
           erb File.read(ResqueCleaner::Server.erb_path('cleaner_exec.erb'))
         end
 
+        post "/cleaner_stale" do
+          cleaner.clear_stale
+          redirect "/cleaner"
+        end
+
         get /cleaner\/public\/([a-z]+\.[a-z]+)/ do
           send_file ResqueCleaner::Server.public_path(params[:captures].first)
         end

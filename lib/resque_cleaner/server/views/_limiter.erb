@@ -1,0 +1,13 @@
+  <div class="warning">
+    <p>
+    There are more than <%= @cleaner.limiter.maximum%> jobs. ResqueCleaner handles only recent <%= @cleaner.limiter.maximum %> jobs. See the Limiter section on <a href="https://github.com/ono/resque-cleaner" target="_blank">README</a> for more detail.
+    </p>
+    <p>
+      <form method="post" action="cleaner_stale">
+        <input type="hidden" name="action" value="clear_stale" />
+        <input type="submit" onclick="return confirm('Are you sure?')" value="Clear all jobs older than <%= @cleaner.limiter.count %>th job."/>
+        (<%= @cleaner.failure.count - @cleaner.limiter.maximum %> jobs will be cleared)
+      </form>
+    </p>
+  </div>
+
