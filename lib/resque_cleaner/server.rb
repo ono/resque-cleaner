@@ -121,11 +121,7 @@ module ResqueCleaner
         get "/cleaner_list" do
           load_cleaner_filter
 
-          block = lambda{|j|
-            (!@from || j.after?(hours_ago(@from))) &&
-            (!@to || j.before?(hours_ago(@to))) &&
-            (!@klass || j.klass?(@klass))
-          }
+          block = filter_block
 
           @failed = cleaner.select(&block).reverse
 
@@ -141,29 +137,20 @@ module ResqueCleaner
         post "/cleaner_exec" do
           load_cleaner_filter
 
-          @sha1 = nil
           if params[:select_all_pages]!="1"
             @sha1 = {}
-            params[:sha1].split(",").each do |s|
-              @sha1[s] = true
-            end
+            params[:sha1].split(",").each {|s| @sha1[s] = true }
           end
 
-          block = lambda{|j|
-            (!@from || j.after?(hours_ago(@from))) &&
-            (!@to || j.before?(hours_ago(@to))) &&
-            (!@klass || j.klass?(@klass))
-            (!@sha1 || @sha1[Digest::SHA1.hexdigest(j.to_json)])
-          }
+          block = filter_block
 
-          count = 
+          @count = 
             case params[:action]
             when "clear" then cleaner.clear(&block)
             when "retry_and_clear" then cleaner.requeue(true,&block)
             when "retry" then cleaner.requeue(false,{},&block)
             end
 
-          @msg = "processed #{count} jobs."
           @url = "cleaner_list?c=#{@klass}&f=#{@from}&t=#{@to}"
           erb File.read(ResqueCleaner::Server.erb_path('cleaner_exec.erb'))
         end
@@ -190,6 +177,15 @@ module ResqueCleaner
       @from = params[:f]=="" ? nil : params[:f]
       @to = params[:t]=="" ? nil : params[:t]
       @klass = params[:c]=="" ? nil : params[:c]
+    end
+
+    def filter_block
+      block = lambda{|j|
+        (!@from || j.after?(hours_ago(@from))) &&
+        (!@to || j.before?(hours_ago(@to))) &&
+        (!@klass || j.klass?(@klass)) && 
+        (!@sha1 || @sha1[Digest::SHA1.hexdigest(j.to_json)])
+      }
     end
 
     def hours_ago(h)
