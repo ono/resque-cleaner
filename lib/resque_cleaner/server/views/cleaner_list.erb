@@ -1,4 +1,4 @@
-<link href="/cleaner/public/cleaner.css" media="screen" rel="stylesheet" type="text/css">
+<link href="cleaner/public/cleaner.css" media="screen" rel="stylesheet" type="text/css">
 
 <!-- Many code was copied from failed.erb of the original resque -->
 <div class="cleaner">
@@ -26,7 +26,7 @@
   <% if @count > 0 %>
     <div class="clearfix">
       <div class="control_panel sub_header">
-        <form method="post" id="exec" action="/cleaner_exec">
+        <form method="post" id="exec" action="cleaner_exec">
           <input type="hidden" name="c" value="<%=@klass%>" />
           <input type="hidden" name="f" value="<%=@from%>" />
           <input type="hidden" name="t" value="<%=@to%>" />

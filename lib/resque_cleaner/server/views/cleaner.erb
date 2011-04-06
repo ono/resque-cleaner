@@ -1,4 +1,4 @@
-<link href="/cleaner/public/cleaner.css" media="screen" rel="stylesheet" type="text/css">
+<link href="cleaner/public/cleaner.css" media="screen" rel="stylesheet" type="text/css">
 
 <div class="cleaner">
   <div class="title clearfix">
@@ -18,22 +18,22 @@
     <% @stats.each do |klass,count| %>
       <tr>
         <td><%= klass %></td>
-        <td class="number"><a href="/cleaner_list?c=<%=klass%>"><%= count["total"] %></a></td>
-        <td class="number"><a href="/cleaner_list?c=<%=klass%>&f=1"><%= count["1h"] %></a></td>
-        <td class="number"><a href="/cleaner_list?c=<%=klass%>&f=3"><%= count["3h"] %></a></td>
-        <td class="number"><a href="/cleaner_list?c=<%=klass%>&f=24"><%= count["1d"] %></a></td>
-        <td class="number"><a href="/cleaner_list?c=<%=klass%>&f=72"><%= count["3d"] %></a></td>
-        <td class="number"><a href="/cleaner_list?c=<%=klass%>&f=168"><%= count["7d"] %></a></td>
+        <td class="number"><a href="cleaner_list?c=<%=klass%>"><%= count["total"] %></a></td>
+        <td class="number"><a href="cleaner_list?c=<%=klass%>&f=1"><%= count["1h"] %></a></td>
+        <td class="number"><a href="cleaner_list?c=<%=klass%>&f=3"><%= count["3h"] %></a></td>
+        <td class="number"><a href="cleaner_list?c=<%=klass%>&f=24"><%= count["1d"] %></a></td>
+        <td class="number"><a href="cleaner_list?c=<%=klass%>&f=72"><%= count["3d"] %></a></td>
+        <td class="number"><a href="cleaner_list?c=<%=klass%>&f=168"><%= count["7d"] %></a></td>
       </tr>
     <% end %>
     <tr class="total">
       <td>Total</td>
-      <td class="number"><a href="/cleaner_list"><%= @total["total"] %></a></td>
-      <td class="number"><a href="/cleaner_list?f=1"><%= @total["1h"] %></a></td>
-      <td class="number"><a href="/cleaner_list?f=3"><%= @total["3h"] %></a></td>
-      <td class="number"><a href="/cleaner_list?f=24"><%= @total["1d"] %></a></td>
-      <td class="number"><a href="/cleaner_list?f=72"><%= @total["3d"] %></a></td>
-      <td class="number"><a href="/cleaner_list?f=168"><%= @total["7d"] %></a></td>
+      <td class="number"><a href="cleaner_list"><%= @total["total"] %></a></td>
+      <td class="number"><a href="cleaner_list?f=1"><%= @total["1h"] %></a></td>
+      <td class="number"><a href="cleaner_list?f=3"><%= @total["3h"] %></a></td>
+      <td class="number"><a href="cleaner_list?f=24"><%= @total["1d"] %></a></td>
+      <td class="number"><a href="cleaner_list?f=72"><%= @total["3d"] %></a></td>
+      <td class="number"><a href="cleaner_list?f=168"><%= @total["7d"] %></a></td>
     </tr>
   </table>
 
