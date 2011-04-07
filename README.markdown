@@ -67,7 +67,7 @@ You could also group them by class.
 Or you could also group them by exception.
 
     > cleaner.stats_by_exception
-   RuntimeError:   35
+	 RuntimeError:   35
     SyntaxError:    7
           total:   42
     => {'RuntimeError' => 35, ...}
