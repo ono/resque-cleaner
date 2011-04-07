@@ -10,7 +10,7 @@ module ResqueCleaner
       File.join(File.dirname(__FILE__), 'server', 'public', filename)
     end
 
-    # Pagination helpr for list page.
+    # Pagination helper for list page.
     class Paginate
       attr_accessor :page_size, :page, :jobs, :url
       def initialize(jobs, url, page=1, page_size=20)
@@ -87,6 +87,16 @@ module ResqueCleaner
             end
             html += "</select>"
           end
+          
+          def exception_filter(id, name, exceptions, value)
+            html = "<select id=\"#{id}\" name=\"#{name}\">"
+            html += "<option value=\"\">-</option>"
+            exceptions.each do |ex|
+              selected = ex == value ? 'selected="selected"' : ''
+              html += "<option #{selected} value=\"#{ex}\">#{ex}</option>"
+            end
+            html += "</select>"
+          end
         end
 
         get "/cleaner" do
@@ -121,10 +131,11 @@ module ResqueCleaner
 
           @failed = cleaner.select(&block).reverse
 
-          url = "cleaner_list?c=#{@klass}&f=#{@from}&t=#{@to}"
+          url = "cleaner_list?c=#{@klass}&ex=#{@exception}f=#{@from}&t=#{@to}"
           @paginate = Paginate.new(@failed, url, params[:p].to_i)
 
           @klasses = cleaner.stats_by_class.keys
+          @exceptions = cleaner.stats_by_exception.keys
           @count = cleaner.select(&block).size
 
           erb File.read(ResqueCleaner::Server.erb_path('cleaner_list.erb'))
@@ -148,7 +159,7 @@ module ResqueCleaner
             when "retry" then cleaner.requeue(false,{},&block)
             end
 
-          @url = "cleaner_list?c=#{@klass}&f=#{@from}&t=#{@to}"
+          @url = "cleaner_list?c=#{@klass}&ex=#{@exception}&f=#{@from}&t=#{@to}"
           erb File.read(ResqueCleaner::Server.erb_path('cleaner_exec.erb'))
         end
 
@@ -184,13 +195,15 @@ module ResqueCleaner
       @from = params[:f]=="" ? nil : params[:f]
       @to = params[:t]=="" ? nil : params[:t]
       @klass = params[:c]=="" ? nil : params[:c]
+      @exception = params[:ex]=="" ? nil : params[:ex]
     end
 
     def filter_block
       block = lambda{|j|
         (!@from || j.after?(hours_ago(@from))) &&
         (!@to || j.before?(hours_ago(@to))) &&
-        (!@klass || j.klass?(@klass)) && 
+        (!@klass || j.klass?(@klass)) &&
+        (!@exception || j.exception?(@exception)) && 
         (!@sha1 || @sha1[Digest::SHA1.hexdigest(j.to_json)])
       }
     end
