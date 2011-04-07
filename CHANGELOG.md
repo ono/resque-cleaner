@@ -1,3 +1,7 @@
+## 0.2.2 (2011-04-07)
+
+* Changed a way to load yajl/json\_gem.
+
 ## 0.2.1 (2011-04-06)
 
 * BUGFIX: Bulk action didn't work properly when you select all jobs.
