@@ -112,6 +112,10 @@ context "ResqueCleaner" do
     # filter by class
     ret = @cleaner.select {|j| j.klass?(BadJobWithSyntaxError)}
     assert_equal 7, ret.size
+    
+    # filter by exception
+    ret = @cleaner.select {|j| j.exception?(SyntaxError)}
+    assert_equal 7, ret.size
 
     # filter by queue
     ret = @cleaner.select {|j| j.queue?(:jobs2)}

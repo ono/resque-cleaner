@@ -173,6 +173,11 @@ module Resque
         def klass?(klass_or_name)
           self["payload"]["class"] == klass_or_name.to_s
         end
+        
+        # Returns true if the exception raised by the failed job matches. Otherwise returns false.
+        def exception?(exception)
+          self["exception"] == exception.to_s
+        end
 
         # Returns true if the queue of the job matches. Otherwise returns false.
         def queue?(queue)
