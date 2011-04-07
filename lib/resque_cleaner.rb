@@ -61,6 +61,19 @@ module Resque
         print_stats(stats) if print?
         stats 
       end
+      
+      # Stats by exception.
+      def stats_by_exception(&block)
+        jobs, stats = select(&block), {}
+        jobs.each do |job|
+          exception = job["exception"]
+          stats[exception] ||= 0
+          stats[exception] += 1
+        end
+
+        print_stats(stats) if print?
+        stats 
+      end
 
       # Print stats
       def print_stats(stats)

@@ -148,6 +148,12 @@ context "ResqueCleaner" do
     assert_equal 35, ret['BadJob']
     assert_equal 7, ret['BadJobWithSyntaxError']
   end
+  
+  test "#stats_by_exception returns stats grouped by exception" do
+    ret = @cleaner.stats_by_exception
+    assert_equal 35, ret['RuntimeError']
+    assert_equal 7, ret['SyntaxError']
+  end
 
   test "#lock ensures that a new failure job doesn't affect in a limit mode" do
     @cleaner.limiter.maximum = 23
