@@ -64,10 +64,18 @@ You could also group them by class.
           total:   10
     => {'BadJob' => 3, ...}
 
-You can get the ones filtered with a block: it targets only jobs which the block
-evaluetes true.
+Or you could also group them by exception.
 
-e.g. Show stats only of jobs entried with some arguments:
+    > cleaner.stats_by_exception
+   RuntimeError:   35
+    SyntaxError:    7
+          total:   42
+    => {'RuntimeError' => 35, ...}
+
+You can get the ones filtered with a block: it targets only jobs which the block
+evaluates true.
+
+e.g. Show stats only of jobs entered with some arguments:
 
     > cleaner.stats_by_date {|j| j["payload"]["args"].size > 0}
     2009/03/13:    3
@@ -90,13 +98,13 @@ e.g. Retry only jobs with some arguments:
     > cleaner.requeue {|j| j["payload"]["args"].size > 0}
 
 The job hash is extended with a module which defines some useful methods. You
-can use it in the blcok.
+can use it in the block.
 
-e.g. Retry only jobs entried within a day:
+e.g. Retry only jobs entered within a day:
 
     > cleaner.requeue {|j| j.after?(1.day.ago)}
 
-e.g. Retry EmailJob entried with arguments within 3 days:
+e.g. Retry EmailJob entered with arguments within 3 days:
 
     > cleaner.requeue {|j| j.after?(3.days.ago) && j.klass?(EmailJob) && j["payload"]["args"].size>0}
 
@@ -112,7 +120,7 @@ You can clear all failed jobs with this method:
 
     > cleaner.clear
 
-Like you can do with the retry method, the clear metod takes a block. Here are
+Like you can do with the retry method, the clear method takes a block. Here are
 some examples:
 
     > cleaner.clear {|j| j.retried?}
@@ -136,7 +144,7 @@ e.g. Retry EmailJob and remove from failed jobs:
 **Retry with other queue**
 
 You can requeue failed jobs into other queue. In this way, you can retry failed
-jobs without blocking jobs being entried by your service running in the live.
+jobs without blocking jobs being entered by your service running in the live.
 
 e.g. Retry failed jobs on :retry queue
 
@@ -156,7 +164,7 @@ You can just select the jobs of course. Here are some examples:
 
 **Helper Methods**
 
-Here is a list of methods a failed job ratained through ResqueCleaner has:
+Here is a list of methods a failed job retained through ResqueCleaner has:
 
     retried?: returns true if the job has already been retried.
     requeued?: alias of retried?.
@@ -200,7 +208,7 @@ ResqueCleaner supposes recent jobs are more important than old jobs. Therefore
 ResqueCleaner deals with **ONLY LAST X(default=1000) JOBS**. In this way, you
 could avoid slow responses. You can change the number through `limiter` attribute.
 
-Let's see how it works with an follwing example.
+Let's see how it works with an following example.
 
 **Sample Situation**
 
@@ -227,13 +235,13 @@ You can change the maximum number of the limiter with maximum attribute.
     > cleaner.limiter.on?
     => true
 
-With limiter, ResqueClener's filtering targets only the last X(3000 in this
-sampe) failed jobs.
+With limiter, ResqueCleaner's filtering targets only the last X(3000 in this
+sample) failed jobs.
 
     > cleaner.select.size
     => 3,000
 
-The clear\_stale method deletes all jobs entried prior to the last X(3000 in
+The clear\_stale method deletes all jobs entered prior to the last X(3000 in
 this sample) failed jobs. This calls Redis API and no iteration occurs on Ruby
 application; it should be quick even if there are huge number of failed jobs.
 
