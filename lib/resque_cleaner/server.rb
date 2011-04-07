@@ -3,12 +3,6 @@
 module ResqueCleaner
   module Server
 
-    begin
-      require 'yajl/json_gem'
-    rescue Exception
-      require 'json'
-    end
-
     def self.erb_path(filename)
       File.join(File.dirname(__FILE__), 'server', 'views', filename)
     end
@@ -67,7 +61,7 @@ module ResqueCleaner
     end
 
     def self.included(base)
-      require 'digest/sha1'
+
       base.class_eval do
         helpers do
           def time_filter(id, name, value)
@@ -96,6 +90,7 @@ module ResqueCleaner
         end
 
         get "/cleaner" do
+          load_library
           load_cleaner_filter
 
           @jobs = cleaner.select
@@ -119,6 +114,7 @@ module ResqueCleaner
         end
 
         get "/cleaner_list" do
+          load_library
           load_cleaner_filter
 
           block = filter_block
@@ -135,6 +131,7 @@ module ResqueCleaner
         end
 
         post "/cleaner_exec" do
+          load_library
           load_cleaner_filter
 
           if params[:select_all_pages]!="1"
@@ -156,6 +153,7 @@ module ResqueCleaner
         end
 
         post "/cleaner_stale" do
+          load_library
           cleaner.clear_stale
           redirect "/cleaner"
         end
@@ -171,6 +169,15 @@ module ResqueCleaner
       @cleaner ||= Resque::Plugins::ResqueCleaner.new
       @cleaner.print_message = false
       @cleaner
+    end
+
+    def load_library
+      require 'digest/sha1'
+      begin
+        require 'yajl/json_gem' unless [].respond_to?(:to_json)
+      rescue Exception
+        require 'json'
+      end
     end
 
     def load_cleaner_filter

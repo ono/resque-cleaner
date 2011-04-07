@@ -2,6 +2,8 @@ require File.expand_path(File.dirname(__FILE__) + '/test_helper')
 
 # Pull in the server test_helper from resque
 require 'resque/server/test_helper.rb'
+require 'digest/sha1'
+require 'json'
 
 def setup_some_failed_jobs
   Resque.redis.flushall
