@@ -87,7 +87,7 @@ module ResqueCleaner
             end
             html += "</select>"
           end
-          
+
           def exception_filter(id, name, exceptions, value)
             html = "<select id=\"#{id}\" name=\"#{name}\">"
             html += "<option value=\"\">-</option>"
@@ -152,7 +152,7 @@ module ResqueCleaner
 
           block = filter_block
 
-          @count = 
+          @count =
             case params[:action]
             when "clear" then cleaner.clear(&block)
             when "retry_and_clear" then cleaner.requeue(true,&block)
@@ -203,7 +203,7 @@ module ResqueCleaner
         (!@from || j.after?(hours_ago(@from))) &&
         (!@to || j.before?(hours_ago(@to))) &&
         (!@klass || j.klass?(@klass)) &&
-        (!@exception || j.exception?(@exception)) && 
+        (!@exception || j.exception?(@exception)) &&
         (!@sha1 || @sha1[Digest::SHA1.hexdigest(j.to_json)])
       }
     end

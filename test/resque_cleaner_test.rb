@@ -112,7 +112,7 @@ context "ResqueCleaner" do
     # filter by class
     ret = @cleaner.select {|j| j.klass?(BadJobWithSyntaxError)}
     assert_equal 7, ret.size
-    
+
     # filter by exception
     ret = @cleaner.select {|j| j.exception?(SyntaxError)}
     assert_equal 7, ret.size
@@ -152,7 +152,7 @@ context "ResqueCleaner" do
     assert_equal 35, ret['BadJob']
     assert_equal 7, ret['BadJobWithSyntaxError']
   end
-  
+
   test "#stats_by_exception returns stats grouped by exception" do
     ret = @cleaner.stats_by_exception
     assert_equal 35, ret['RuntimeError']

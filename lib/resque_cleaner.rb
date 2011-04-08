@@ -46,7 +46,7 @@ module Resque
         end
 
         print_stats(stats) if print?
-        stats 
+        stats
       end
 
       # Stats by class.
@@ -59,9 +59,9 @@ module Resque
         end
 
         print_stats(stats) if print?
-        stats 
+        stats
       end
-      
+
       # Stats by exception.
       def stats_by_exception(&block)
         jobs, stats = select(&block), {}
@@ -72,7 +72,7 @@ module Resque
         end
 
         print_stats(stats) if print?
-        stats 
+        stats
       end
 
       # Print stats
@@ -173,7 +173,7 @@ module Resque
         def klass?(klass_or_name)
           self["payload"]["class"] == klass_or_name.to_s
         end
-        
+
         # Returns true if the exception raised by the failed job matches. Otherwise returns false.
         def exception?(exception)
           self["exception"] == exception.to_s
@@ -186,7 +186,7 @@ module Resque
       end
 
       # Through the Limiter class, you accesses only the last x(default 1000)
-      # jobs. 
+      # jobs.
       class Limiter
         DEFAULT_MAX_JOBS = 1000
         attr_accessor :maximum
