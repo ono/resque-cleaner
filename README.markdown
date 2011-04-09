@@ -129,7 +129,7 @@ some examples:
     > cleaner.clear {|j| j.queue?(:low) && j.before?('2010-10-10')}
     => clears all jobs entried in :low queue before 10th October, 2010.
 
-    > cleaner.clear {|j| j["exception"]=="RuntimeError" && j.queue?(:low)}
+    > cleaner.clear {|j| j.exception?("RuntimeError") && j.queue?(:low)}
     => clears all jobs raised RuntimeError and queued :low queue
 
 **Retry and Clear Jobs**
@@ -158,7 +158,7 @@ Don't forget to launch resque worker for the queue.
 
 You can just select the jobs of course. Here are some examples:
 
-    > cleaner.select {|j| j["exception"]=="RuntimeError"}
+    > cleaner.select {|j| j["payload"]["args"][0]=="Johonson"}
     > cleaner.select {|j| j.after?(2.days.ago)}
     > cleaner.select #=> returns all jobs
 
@@ -172,6 +172,7 @@ Here is a list of methods a failed job retained through ResqueCleaner has:
     after?(time): returns true if the job failed after the time.
     klass?(klass_or_name): returns true if the class of job matches.
     queue?(queue_name): returns true if the queue of job matches.
+    exception?(exception_name): returns true if the exception matches.
 
 
 Failed Job
