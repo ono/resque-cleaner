@@ -253,4 +253,9 @@ application; it should be quick even if there are huge number of failed jobs.
     > cleaner.limiter.on?
     => false
 
+Many Thanks!
+------------
+
+To our [Contributors](https://github.com/ono/resque-cleaner/contributors)
+
 
