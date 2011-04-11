@@ -1,3 +1,7 @@
+## 0.2.3 (2011-04-11)
+
+* Exception filter.
+
 ## 0.2.2 (2011-04-07)
 
 * Changed a way to load yajl/json\_gem.
