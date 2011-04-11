@@ -19,7 +19,7 @@ Gem::Specification.new do |s|
   s.add_dependency "resque", "~> 1.0"
 
   s.description = <<DESCRIPTION
-    Resque helper plugin cleaning up failed jobs with some neat features such as filtering, retrying, removing and showing stats.
+    resque-cleaner maintains the cleanliness of failed jobs on Resque.
 DESCRIPTION
 end
 
