@@ -1,3 +1,7 @@
+## 0.2.4 (2011-04-19)
+
+* BUGFIX: "Select All" ignores exception filter.
+
 ## 0.2.3 (2011-04-11)
 
 * Exception filter.
