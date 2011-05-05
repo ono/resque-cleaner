@@ -1,3 +1,8 @@
+## 0.2.5 (2011-05-05)
+
+* BUGFIX: Pagination has been broken.
+* Dump a list as JSON format.
+
 ## 0.2.4 (2011-04-19)
 
 * BUGFIX: "Select All" ignores exception filter.
