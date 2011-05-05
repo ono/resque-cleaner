@@ -57,5 +57,8 @@
 #main .cleaner ul.pagination li.summary{
   padding-right: 10px
 }
+#main .cleaner div.dump{
+  float: right
+}
 
 
