@@ -99,6 +99,8 @@ module ResqueCleaner
           end
         end
 
+        mime_type :json, 'application/json'
+
         get "/cleaner" do
           load_library
           load_cleaner_filter
@@ -161,6 +163,16 @@ module ResqueCleaner
 
           @url = "cleaner_list?c=#{@klass}&ex=#{@exception}&f=#{@from}&t=#{@to}"
           erb File.read(ResqueCleaner::Server.erb_path('cleaner_exec.erb'))
+        end
+
+        get "/cleaner_dump" do
+          load_library
+          load_cleaner_filter
+
+          block = filter_block
+
+          content_type :json
+          JSON.pretty_generate(cleaner.select(&block))
         end
 
         post "/cleaner_stale" do

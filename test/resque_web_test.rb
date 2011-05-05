@@ -42,5 +42,9 @@ context "resque-web" do
     post "/cleaner_exec", :action => "clear", :sha1 => Digest::SHA1.hexdigest(@cleaner.select[0].to_json)
     assert_equal 9, @cleaner.select.size
   end
+  test "#cleaner_dump should respond with success" do
+    get "/cleaner_dump"
+    assert last_response.ok?, last_response.errors
+  end
 end
 
