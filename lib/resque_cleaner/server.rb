@@ -133,7 +133,7 @@ module ResqueCleaner
 
           @failed = cleaner.select(&block).reverse
 
-          url = "cleaner_list?c=#{@klass}&ex=#{@exception}f=#{@from}&t=#{@to}"
+          url = "cleaner_list?c=#{@klass}&ex=#{@exception}&f=#{@from}&t=#{@to}"
           @paginate = Paginate.new(@failed, url, params[:p].to_i)
 
           @klasses = cleaner.stats_by_class.keys
