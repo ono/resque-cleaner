@@ -32,7 +32,9 @@ Resque-Web integration
 
 You have to load ResqueCleaner to enable the Cleaner tab.
 
+```ruby
     require 'resque-cleaner'
+```
 
 Console
 -------
@@ -43,70 +45,88 @@ you to understand what is going on with your console(irb).
 
 **Create Instance**
 
+```ruby
     > cleaner = Resque::Plugins::ResqueCleaner.new
+```
 
 **Show Stats**
 
 Shows stats of failed jobs grouped by date.
 
+```ruby
     > cleaner.stats_by_date
     2009/03/13:    6
     2009/11/13:   14
     2010/08/13:   22
          total:   42
     => {'2009/03/10' => 6, ...}
+```
 
 You could also group them by class.
 
+```ruby
     > cleaner.stats_by_class
          BadJob:    3
     HorribleJob:    7
           total:   10
     => {'BadJob' => 3, ...}
+```
 
 Or you could also group them by exception.
 
+```ruby
     > cleaner.stats_by_exception
 	 RuntimeError:   35
     SyntaxError:    7
           total:   42
     => {'RuntimeError' => 35, ...}
+```
 
 You can get the ones filtered with a block: it targets only jobs which the block
 evaluates true.
 
 e.g. Show stats only of jobs entered with some arguments:
 
+```ruby
     > cleaner.stats_by_date {|j| j["payload"]["args"].size > 0}
     2009/03/13:    3
     2009/11/13:    7
     2010/08/13:   11
          total:   22
     => {'2009/03/10' => 3, ...}
+```
 
 **Retry(Requeue) Jobs**
 
 You can retry all failed jobs with this method.
 
+```ruby
     > cleaner.requeue
+```
 
 Of course, you can filter jobs with a block; it requeues only jobs which the
 block evaluates true. 
 
 e.g. Retry only jobs with some arguments:
 
+```ruby
     > cleaner.requeue {|j| j["payload"]["args"].size > 0}
+```
 
 The job hash is extended with a module which defines some useful methods. You
 can use it in the block.
 
 e.g. Retry only jobs entered within a day:
 
+```ruby
     > cleaner.requeue {|j| j.after?(1.day.ago)}
+```
 
 e.g. Retry EmailJob entered with arguments within 3 days:
 
+```ruby
     > cleaner.requeue {|j| j.after?(3.days.ago) && j.klass?(EmailJob) && j["payload"]["args"].size>0}
+```
 
 See Helper Methods section bellow for more information.
 
@@ -118,11 +138,14 @@ is not in standard library. Using it for making explanation more understandable.
 
 You can clear all failed jobs with this method:
 
+```ruby
     > cleaner.clear
+```
 
 Like you can do with the retry method, the clear method takes a block. Here are
 some examples:
 
+```ruby
     > cleaner.clear {|j| j.retried?}
     => clears all jobs already retried and returns number of the jobs.
 
@@ -131,6 +154,7 @@ some examples:
 
     > cleaner.clear {|j| j.exception?("RuntimeError") && j.queue?(:low)}
     => clears all jobs raised RuntimeError and queued :low queue
+```
 
 **Retry and Clear Jobs**
 
@@ -139,7 +163,9 @@ as an argument.
 
 e.g. Retry EmailJob and remove from failed jobs:
 
+```ruby
     > cleaner.requeue(true) {|j| j.klass?(EmailJob)}
+```
 
 **Retry with other queue**
 
@@ -148,7 +174,9 @@ jobs without blocking jobs being entered by your service running in the live.
 
 e.g. Retry failed jobs on :retry queue
 
+```ruby
     > cleaner.requeue(false, :queue => :retry)
+```
 
 Don't forget to launch resque worker for the queue.
 
@@ -158,9 +186,11 @@ Don't forget to launch resque worker for the queue.
 
 You can just select the jobs of course. Here are some examples:
 
+```ruby
     > cleaner.select {|j| j["payload"]["args"][0]=="Johonson"}
     > cleaner.select {|j| j.after?(2.days.ago)}
     > cleaner.select #=> returns all jobs
+```
 
 **Helper Methods**
 
@@ -217,35 +247,44 @@ Let's see how it works with an following example.
 
 Default limiter is 1000 so that the limiter returns 1000 as a count.
 
+```ruby
     > cleaner.limiter.count
     => 1,000
     > cleaner.failure.count
     => 100,000
+```
 
 You could know if the limiter is on with on? method.
 
+```ruby
     > cleaner.limiter.on?
     => true
+```
 
 You can change the maximum number of the limiter with maximum attribute.
 
+```ruby
     > cleaner.limiter.maxmum = 3000
     => 3,000
     > cleaner.limiter.count
     => 3,000
     > cleaner.limiter.on?
     => true
+```
 
 With limiter, ResqueCleaner's filtering targets only the last X(3000 in this
 sample) failed jobs.
 
+```ruby
     > cleaner.select.size
     => 3,000
+```
 
 The clear\_stale method deletes all jobs entered prior to the last X(3000 in
 this sample) failed jobs. This calls Redis API and no iteration occurs on Ruby
 application; it should be quick even if there are huge number of failed jobs.
 
+```ruby
     > cleaner.clear_stale
     > cleaner.failure.count
     => 3,000
@@ -253,6 +292,7 @@ application; it should be quick even if there are huge number of failed jobs.
     => 3,000
     > cleaner.limiter.on?
     => false
+```
 
 Many Thanks!
 ------------
