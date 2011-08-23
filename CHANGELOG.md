@@ -1,3 +1,7 @@
+## 0.2.6 (2011-08-23)
+
+* Follow the latest resque for date format.
+
 ## 0.2.5 (2011-05-05)
 
 * BUGFIX: Pagination has been broken.
