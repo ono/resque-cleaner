@@ -226,7 +226,10 @@ module Resque
           jobs = @cleaner.failure.all( index, count)
           jobs = [] unless jobs
           jobs = [jobs] unless jobs.is_a?(Array)
-          jobs.each{|j| j.extend FailedJobEx}
+          jobs = jobs.select do |job|
+            job.extend FailedJobEx
+            job && job["payload"]
+          end
           jobs
         end
 
