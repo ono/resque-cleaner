@@ -211,7 +211,7 @@ module Resque
           end
         end
 
-        # Returns jobs. If numbers of jobs is more than maixum, it returns only
+        # Returns jobs. If numbers of jobs is more than maximum, it returns only
         # the maximum.
         def jobs
           if @locked
