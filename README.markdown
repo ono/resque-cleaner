@@ -264,7 +264,7 @@ You could know if the limiter is on with on? method.
 You can change the maximum number of the limiter with maximum attribute.
 
 ```ruby
-    > cleaner.limiter.maxmum = 3000
+    > cleaner.limiter.maximum = 3000
     => 3,000
     > cleaner.limiter.count
     => 3,000
