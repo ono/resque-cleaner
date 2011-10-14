@@ -1,3 +1,3 @@
-# Other rubygems requirement.
+source :rubygems
 
 gem 'resque'
