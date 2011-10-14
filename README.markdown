@@ -1,4 +1,4 @@
-ResqueCleaner
+ResqueCleaner [ ![Travis-CI](https://secure.travis-ci.org/ono/resque-cleaner.png?branch=master "Travis CI") ](http://travis-ci.org/ono/resque-cleaner "Travis CI for resque-cleaner")
 ==============
 
 [github.com/ono/resque-cleaner](https://github.com/ono/resque-cleaner)
