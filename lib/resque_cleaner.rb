@@ -53,7 +53,7 @@ module Resque
       def stats_by_class(&block)
         jobs, stats = select(&block), {}
         jobs.each do |job|
-          klass = job["payload"]["class"]
+          klass = job["payload"] && job["payload"]["class"] ? job["payload"]["class"] : "UNKNOWN"
           stats[klass] ||= 0
           stats[klass] += 1
         end
@@ -171,7 +171,11 @@ module Resque
 
         # Returns true if the class of the job matches. Otherwise returns false.
         def klass?(klass_or_name)
-          self["payload"]["class"] == klass_or_name.to_s
+          if self["payload"] && self["payload"]["class"]
+            self["payload"]["class"] == klass_or_name.to_s
+          else
+            klass_or_name=="UNKNOWN"
+          end
         end
 
         # Returns true if the exception raised by the failed job matches. Otherwise returns false.
