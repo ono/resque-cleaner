@@ -108,7 +108,11 @@ module ResqueCleaner
           @jobs = cleaner.select
           @stats, @total = {}, {"total" => 0, "1h" => 0, "3h" => 0, "1d" => 0, "3d" => 0, "7d" => 0}
           @jobs.each do |job|
-            klass = job["payload"]["class"]
+            klass = if job["payload"] && job["payload"]["class"]
+              job["payload"]["class"]
+            else
+              "UNKNOWN"
+            end
             failed_at = Time.parse job["failed_at"]
 
             @stats[klass] ||= {"total" => 0, "1h" => 0, "3h" => 0, "1d" => 0, "3d" => 0, "7d" => 0}
