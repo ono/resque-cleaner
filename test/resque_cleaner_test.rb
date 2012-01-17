@@ -153,6 +153,12 @@ context "ResqueCleaner" do
     assert_equal 7, ret['BadJobWithSyntaxError']
   end
 
+  test "#stats_by_class works with broken log" do
+    add_empty_payload_failure
+    ret = @cleaner.stats_by_class
+    assert_equal 1, ret['UNKNOWN']
+  end
+
   test "#stats_by_exception returns stats grouped by exception" do
     ret = @cleaner.stats_by_exception
     assert_equal 35, ret['RuntimeError']

@@ -137,3 +137,17 @@ end
 def queue_size(*queues)
   queues.inject(0){|sum,queue| sum + Resque.size(queue).to_i}
 end
+
+def add_empty_payload_failure
+  data = {
+    :failed_at => Time.now.strftime("%Y/%m/%d %H:%M:%S %Z"),
+    :payload   => nil,
+    :exception => "Resque::DirtyExit",
+    :error     => "Resque::DirtyExit",
+    :backtrace => [],
+    :worker    => "worker",
+    :queue     => "queue"
+  }
+  data = Resque.encode(data)
+  Resque.redis.rpush(:failed, data)
+end
