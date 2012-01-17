@@ -1,3 +1,8 @@
+## 0.2.7 (2012-01-17)
+
+* Support Travis CI
+* Support failure jobs without payload information (#11).
+
 ## 0.2.6 (2011-08-23)
 
 * Follow the latest resque for date format.
