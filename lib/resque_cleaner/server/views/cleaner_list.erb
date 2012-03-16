@@ -45,7 +45,8 @@
           <a href="#" id="reset_all">reset</a>
 
           <% if @paginate.max_page > 1 %>
-            <input type="checkbox" name="select_all_pages" value="1" id="select_all_pages" />Select all <%=@count%> jobs
+            <input type="checkbox" name="select_all_pages" value="1" id="select_all_pages" />
+            <label for="select_all_pages">Select all <%=@count%> jobs</label>
           <% end %>
           <input type="hidden" name="sha1" id="sha1_list" />
 
