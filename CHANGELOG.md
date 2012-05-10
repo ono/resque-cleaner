@@ -1,3 +1,7 @@
+## 0.2.9 (2012-05-10)
+
+* Make limiter configurable on resque-web.
+
 ## 0.2.8 (2012-03-19)
 
 * UI tweak (#15)
