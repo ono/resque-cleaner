@@ -192,11 +192,22 @@ module Resque
       # Through the Limiter class, you accesses only the last x(default 1000)
       # jobs.
       class Limiter
-        DEFAULT_MAX_JOBS = 1000
+        @@default_maximum ||= 1000
+
+        class << self
+          def default_maximum
+            @@default_maximum
+          end
+
+          def default_maximum=(v)
+            @@default_maximum = v
+          end
+        end
+
         attr_accessor :maximum
         def initialize(cleaner)
           @cleaner = cleaner
-          @maximum = DEFAULT_MAX_JOBS
+          @maximum = @@default_maximum
           @locked = false
         end
 

@@ -179,4 +179,16 @@ context "ResqueCleaner" do
     first = @cleaner.select[0]
     assert_equal "Jack", first["payload"]["args"][0]
   end
+
+  test "allows you to configure limiter" do
+    c = Resque::Plugins::ResqueCleaner.new
+    assert_not_equal c.limiter.maximum, 10_000
+
+    module Resque::Plugins
+      ResqueCleaner::Limiter.default_maximum = 10_000
+    end
+
+    c = Resque::Plugins::ResqueCleaner.new
+    assert_equal c.limiter.maximum, 10_000
+  end
 end
