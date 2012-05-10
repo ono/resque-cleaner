@@ -30,10 +30,32 @@ Resque-Web integration
 ![Screen 1](https://github.com/ono/resque-cleaner/raw/master/misc/resque-cleaner-main.png)
 ![Screen 2](https://github.com/ono/resque-cleaner/raw/master/misc/resque-cleaner-list.png)
 
-You have to load ResqueCleaner to enable the Cleaner tab.
+
+Configuration
+-------------
+
+At first, you have to load ResqueCleaner to enable the Cleaner tab. Here is
+an example step.
+
+1. Create a configuration file for resque-web
+<br/>```touch [app_dir]/config/resque-web.rb```
+
+2. Add the following line into the file
+<br/>```require 'resque-cleaner'```
+
+3. Then pass the file when you start resque-web
+<br/>```% resque-web [app_dir]/config/resque-web.rb```
+
+You can also configure [limiter](https://github.com/ono/resque-cleaner#limiter)
+in the file.
+
+e.g.
 
 ```ruby
-    require 'resque-cleaner'
+require 'resque-cleaner'
+module Resque::Plugins
+  ResqueCleaner::Limiter.default_maximum = 10_000
+end
 ```
 
 Console
