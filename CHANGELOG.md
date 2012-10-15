@@ -1,3 +1,7 @@
+## 0.2.10 (2012-10-15)
+
+* Bug fix: use URL helper to support resque-web which is not hosted under '/'.
+
 ## 0.2.9 (2012-05-10)
 
 * Make limiter configurable on resque-web.
