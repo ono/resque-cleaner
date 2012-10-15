@@ -183,7 +183,7 @@ module ResqueCleaner
         post "/cleaner_stale" do
           load_library
           cleaner.clear_stale
-          redirect "/cleaner"
+          redirect url_path(:cleaner)
         end
 
         get /cleaner\/public\/([a-z]+\.[a-z]+)/ do
