@@ -124,6 +124,7 @@ module Resque
 
                 if clear_after_requeue
                   # remove job
+                  # TODO: should use ltrim. not sure why i used lrem here...
                   redis.lrem(:failed, 1, value)
                 else
                   # mark retried
