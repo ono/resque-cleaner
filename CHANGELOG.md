@@ -1,3 +1,8 @@
+## 0.2.11 (2013-07-19)
+
+* Use transaction for retry-and-clear (#22).
+* Fix for CI
+
 ## 0.2.10 (2012-10-15)
 
 * Bug fix: use URL helper to support resque-web which is not hosted under '/'.
