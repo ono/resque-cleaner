@@ -7,7 +7,6 @@ module Resque
     # ResqueCleaner class provides useful functionalities to retry or clean
     # failed jobs. Let's clean up your failed list!
     class ResqueCleaner
-      include Resque::Helpers
       # ResqueCleaner fetches all elements from Redis and checks them
       # by linear when filtering them. Since there is a performance concern,
       # ResqueCleaner handles only the latest x(default 1000) jobs.
