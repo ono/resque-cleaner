@@ -133,6 +133,19 @@
 
     $('#form_action').change( function() {
       if ($('#form_action option:selected').val()=='') return;
+      var action = '';
+      var numSelected = '';
+      if ($('input:checkbox:disabled').length > 0){
+        numSelected = <%=@count%> + " jobs";
+      }
+      else{
+        if ($('input:checkbox:checked').length > 1) {
+          numSelected = $('input:checkbox:checked').length + " jobs";
+        }
+        else {
+          numSelected = $('input:checkbox:checked').length + " job";
+        }
+      }
 
       if ($('#select_all_pages:checked, .failed input:checked').length==0) {
         alert('Please select jobs.');
@@ -140,7 +153,21 @@
         return false;
       }
 
-      if (!confirm('Do you really want to proceed?')) {
+      switch ($('#form_action option:selected').val()){
+        case 'clear':
+          action = 'CLEAR JOBS\nYou are about to clear ' + numSelected + '\n';
+          break;
+        case 'retry_and_clear':
+          action = 'RETRY AND CLEAR JOBS\nYou have chosen to retry AND clear ' + numSelected + '\n';
+          break;
+        case 'retry':
+          action = 'RETRY JOBS\nYou are about to retry ' + numSelected + '\n';
+          break;
+        default:
+          action = 'Error - not a valid option';
+      }
+
+      if (!confirm(action + 'Do you really want to proceed?')) {
         $('#default_option').attr('selected','selected');
         return false;
       }
