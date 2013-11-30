@@ -15,6 +15,7 @@ module Resque
       # You can change the value through limiter attribute.
       # e.g. cleaner.limiter.maximum = 5000
       attr_reader :limiter
+      attr_reader :retry_opt
 
       # Set false if you don't show any message.
       attr_accessor :print_message
@@ -24,6 +25,7 @@ module Resque
         @failure = Resque::Failure.backend
         @print_message = true
         @limiter = Limiter.new self
+        @retry_opt = Retry.new self
       end
 
       # Returns redis instance.
@@ -278,6 +280,34 @@ module Resque
           yield
         ensure
           @locked = old
+        end
+      end
+
+      # The Retry class offers the retry option for failed jobs to be turned
+      # on or off. The default(true) is on.
+      class Retry
+        @@default_config ||= true 
+
+        class << self
+          def default_config
+            @@default_config
+          end
+
+          def default_config=(v)
+            @@default_config = v
+          end
+        end
+
+        attr_accessor :config
+        def initialize(cleaner)
+          @cleaner = cleaner
+          @config = @@default_config
+          @locked = false
+        end
+
+        # Returns true if Retry option is ON
+        def on?
+          @config
         end
       end
 

@@ -39,7 +39,9 @@
             <option id="default_option" value="" selected="selected">-- Select Action --</option>
             <option value="clear">Clear</option>
             <option value="retry_and_clear">Retry and Clear</option>
-            <option value="retry">Retry</option>
+            <% if @cleaner.retry_opt.on? %>
+              <option value="retry">Retry</option>
+            <% end %>
           </select>
           <a href="#" id="select_all">select all</a>
           <a href="#" id="reset_all">reset</a>

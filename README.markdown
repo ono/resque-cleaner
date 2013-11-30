@@ -46,7 +46,7 @@ an example step.
 <br/>```% resque-web [app_dir]/config/resque-web.rb```
 
 You can also configure [limiter](https://github.com/ono/resque-cleaner#limiter)
-in the file.
+and the retry option in the file.
 
 e.g.
 
@@ -54,6 +54,7 @@ e.g.
 require 'resque-cleaner'
 module Resque::Plugins
   ResqueCleaner::Limiter.default_maximum = 10_000
+  ResqueCleaner::Retry.default_config = true 
 end
 ```
 
@@ -313,6 +314,29 @@ application; it should be quick even if there are huge number of failed jobs.
     => 3,000
     > cleaner.limiter.on?
     => false
+```
+
+Retry
+-----
+
+ResqueCleaner on default offers the option to retry failed jobs
+without clearing them out of the failed jobs list. This can be handy to keep
+track of when the same jobs have failed in the past, however, the retry option
+can be turned off in order to limit your options to Clear or Clear and Retry.
+By ensuring that every action includes the clearing of jobs, your list of failed
+jobs is kept neat and less cluttered. It is also more obvious how many unique
+failed jobs there are.
+
+This option is configurable only in your application's configuration file for
+resque-web, where `false` turns off the Retry option and `true` turns it on. 
+The default value is true when not explicitly configured.
+For example, the following will turn the Retry option off:
+
+```ruby
+require 'resque-cleaner'
+module Resque::Plugins
+  ResqueCleaner::Retry.default_config = false 
+end
 ```
 
 Many Thanks!
