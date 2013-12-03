@@ -1,3 +1,5 @@
+require 'yaml'
+
 # Extends Resque Web Based UI.
 # Structure has been borrowed from ResqueScheduler.
 module ResqueCleaner
