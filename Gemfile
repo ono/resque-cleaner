@@ -1,6 +1,6 @@
-source :rubygems
+source 'https://rubygems.org'
 
-gem 'resque'
+gemspec
 
 group :test do
   gem 'rake'
