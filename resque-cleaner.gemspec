@@ -3,9 +3,10 @@ Gem::Specification.new do |s|
   s.version           = "0.2.11"
   s.date              = Time.now.strftime('%Y-%m-%d')
   s.summary           = "Resque plugin cleaning up failed jobs."
-  s.homepage          = "http://github.com/ono/resque-cleaner"
+  s.homepage          = "https://github.com/ono/resque-cleaner"
   s.email             = "ononoma@gmail.com"
   s.authors           = [ "Tatsuya Ono" ]
+  s.license           = "MIT"
 
   s.files             = %w( README.markdown CHANGELOG.md Rakefile LICENSE )
   s.files            += Dir.glob("lib/**/*")
