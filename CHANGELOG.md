@@ -1,3 +1,10 @@
+## 0.2.12 (2013-12-03)
+
+* Remove Resque::Helpers include (#23)
+* Tweak Gemspec (#24)
+* Don't use yaml format to show arguments
+* Tweak README
+
 ## 0.2.11 (2013-07-19)
 
 * Use transaction for retry-and-clear (#22).
