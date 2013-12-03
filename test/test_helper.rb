@@ -31,7 +31,6 @@ end
 # start our own redis when the tests start,
 # kill it when they end
 #
-
 at_exit do
   next if $!
 
@@ -43,8 +42,9 @@ at_exit do
 
   pid = `ps -A -o pid,command | grep [r]edis-test`.split(" ")[0]
   puts "Killing test redis server..."
-  `rm -f #{dir}/dump.rdb`
   Process.kill("KILL", pid.to_i)
+  dump = "test/dump.rdb"
+  File.delete(dump) if File.exist?(dump)
   exit exit_code
 end
 
