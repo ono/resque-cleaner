@@ -6,6 +6,7 @@ Gem::Specification.new do |s|
   s.homepage          = "https://github.com/ono/resque-cleaner"
   s.email             = "ononoma@gmail.com"
   s.authors           = [ "Tatsuya Ono" ]
+  s.license           = "MIT"
 
   s.files             = %w( README.markdown CHANGELOG.md Rakefile LICENSE )
   s.files            += Dir.glob("lib/**/*")
