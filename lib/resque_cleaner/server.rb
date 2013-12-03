@@ -99,6 +99,10 @@ module ResqueCleaner
             end
             html += "</select>"
           end
+
+          def show_job_args(args)
+            Array(args).map { |a| a.inspect }.join("\n")
+          end
         end
 
         mime_type :json, 'application/json'
