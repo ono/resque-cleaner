@@ -143,8 +143,8 @@ module ResqueCleaner
 
           @failed = cleaner.select(&block).reverse
 
-          url = "cleaner_list?c=#{@klass}&ex=#{@exception}&f=#{@from}&t=#{@to}"
-          @dump_url = "cleaner_dump?c=#{@klass}&ex=#{@exception}&f=#{@from}&t=#{@to}"
+          url = "cleaner_list?c=#{@klass}&ex=#{@exception}&f=#{@from}&t=#{@to}&regex=#{@regex}"
+          @dump_url = "cleaner_dump?c=#{@klass}&ex=#{@exception}&f=#{@from}&t=#{@to}&regex=#{@regex}"
           @paginate = Paginate.new(@failed, url, params[:p].to_i)
 
           @klasses = cleaner.stats_by_class.keys
@@ -219,6 +219,7 @@ module ResqueCleaner
       @to = params[:t]=="" ? nil : params[:t]
       @klass = params[:c]=="" ? nil : params[:c]
       @exception = params[:ex]=="" ? nil : params[:ex]
+      @regex = params[:regex]=="" ? nil : params[:regex]
     end
 
     def filter_block
@@ -227,7 +228,8 @@ module ResqueCleaner
         (!@to || j.before?(hours_ago(@to))) &&
         (!@klass || j.klass?(@klass)) &&
         (!@exception || j.exception?(@exception)) &&
-        (!@sha1 || @sha1[Digest::SHA1.hexdigest(j.to_json)])
+        (!@sha1 || @sha1[Digest::SHA1.hexdigest(j.to_json)]) &&
+        (!@regex || j.to_s =~ /#{@regex}/)
       }
     end
 

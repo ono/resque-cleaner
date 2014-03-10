@@ -10,6 +10,8 @@ def setup_some_failed_jobs
 
   @worker = Resque::Worker.new(:jobs,:jobs2)
 
+  create_and_process_jobs :jobs, @worker, 1, Time.now, BadJobWithSyntaxError, "great_args"
+
   10.times {|i|
     create_and_process_jobs :jobs, @worker, 1, Time.now, BadJob, "test_#{i}"
   }
@@ -37,6 +39,13 @@ context "resque-web" do
     get "/cleaner_list"
     assert last_response.body.include?('BadJob')
   end
+
+  test "#cleaner_list shows the failed jobs when we use a select_by_regex" do
+    get "/cleaner_list", :regex => "BadJob*"
+    assert last_response.body.include?('"BadJobWithSyntaxError"')
+    assert last_response.body.include?('"BadJob"')
+  end
+
 
   test '#cleaner_exec clears job' do
     post "/cleaner_exec", :action => "clear", :sha1 => Digest::SHA1.hexdigest(@cleaner.select[0].to_json)
