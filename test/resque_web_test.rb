@@ -49,7 +49,7 @@ context "resque-web" do
 
   test '#cleaner_exec clears job' do
     post "/cleaner_exec", :action => "clear", :sha1 => Digest::SHA1.hexdigest(@cleaner.select[0].to_json)
-    assert_equal 9, @cleaner.select.size
+    assert_equal 10, @cleaner.select.size
   end
   test "#cleaner_dump should respond with success" do
     get "/cleaner_dump"
