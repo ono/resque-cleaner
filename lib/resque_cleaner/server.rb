@@ -103,6 +103,11 @@ module ResqueCleaner
           def show_job_args(args)
             Array(args).map { |a| a.inspect }.join("\n")
           end
+
+          def text_filter(id, name, value, rows=1, cols=20)
+            html = "<textarea id=\"#{id}\" placeholder=\"#{value}\" name=\"#{name}\" rows=\"#{rows}\" cols=\"#{cols}\" >"
+            html += "</textarea>"
+          end
         end
 
         mime_type :json, 'application/json'
