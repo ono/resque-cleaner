@@ -27,7 +27,7 @@ Resque-Web integration
 ----------------------
 
 ![Screen 1](https://github.com/ono/resque-cleaner/raw/master/misc/resque-cleaner-main.png)
-![Screen 2](https://github.com/ono/resque-cleaner/raw/master/misc/resque-cleaner-list.png)
+![Screen 2](misc/resque-cleaner-list-with-regex.png)
 
 
 Configuration
@@ -121,8 +121,7 @@ A convenience helper for searching for failed jobs which satisfy a
 regular expression:
 
 ```ruby
-    > cleaner.select_by_regex(/Jason/) # => all failed jobs that have
-    > "Jason" in them
+cleaner.select_by_regex(/Jason/) # => all failed jobs that have "Jason" in them
 ```
 
 **Retry(Requeue) Jobs**
