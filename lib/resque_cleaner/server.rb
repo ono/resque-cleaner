@@ -104,9 +104,9 @@ module ResqueCleaner
             Array(args).map { |a| a.inspect }.join("\n")
           end
 
-          def text_filter(id, name, value, rows=1, cols=20)
-            html = "<textarea id=\"#{id}\" placeholder=\"#{value}\" name=\"#{name}\" rows=\"#{rows}\" cols=\"#{cols}\" >"
-            html += "</textarea>"
+          def text_filter(id, name, value)
+            html = "<input id=\"#{id}\"  type=\"text\" name=\"#{name}\" value=\"#{value}\">"
+            html += "</input>"
           end
         end
 
