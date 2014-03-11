@@ -117,6 +117,14 @@ e.g. Show stats only of jobs entered with some arguments:
     => {'2009/03/10' => 3, ...}
 ```
 
+A convenience helper for searching for failed jobs which satisfy a
+regular expression:
+
+```ruby
+    > cleaner.select_by_regex(/Jason/) # => all failed jobs that have
+    > "Jason" in them
+```
+
 **Retry(Requeue) Jobs**
 
 You can retry all failed jobs with this method.
