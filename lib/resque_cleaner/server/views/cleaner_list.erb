@@ -22,7 +22,7 @@
           To: <%= time_filter("filter_to","t",@to)%>
         </span>
         <span class="regex_filter">
-          Regex: <%= text_filter("filter_regex", "regex", @regex)%>
+          Regex: <%= text_filter("filter_regex", "regex", Rack::Utils.escape_html(@regex))%>
         </span>
         <input type="submit" value="Filter" />
       </form>
