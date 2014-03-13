@@ -24,8 +24,9 @@ context "resque-web" do
   end
 
   test "#cleaner should respond with success" do
-    get "/cleaner_list"
-    assert last_response.ok?, last_response.errors
+    get "/cleaner"
+    assert last_response.body.include?('BadJob')
+    assert last_response.body =~ /\bException\b/
   end
 
   test "#cleaner_list should respond with success" do

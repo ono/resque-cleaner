@@ -5,37 +5,16 @@
     <h1>Job Classes Failed</h1>
   </div>
 
-  <table class="class_list">
-    <tr>
-      <th>Class</th>
-      <th>Failed</th>
-      <th>In last 1 hour</th>
-      <th>In last 3 hours</th>
-      <th>In last 24 hours</th>
-      <th>In last 3 days</th>
-      <th>In last 7 days</th>
-    </tr>
-    <% @stats.each do |klass,count| %>
-      <tr>
-        <td><%= klass %></td>
-        <td class="number"><a href="cleaner_list?c=<%=klass%>"><%= count["total"] %></a></td>
-        <td class="number"><a href="cleaner_list?c=<%=klass%>&f=1"><%= count["1h"] %></a></td>
-        <td class="number"><a href="cleaner_list?c=<%=klass%>&f=3"><%= count["3h"] %></a></td>
-        <td class="number"><a href="cleaner_list?c=<%=klass%>&f=24"><%= count["1d"] %></a></td>
-        <td class="number"><a href="cleaner_list?c=<%=klass%>&f=72"><%= count["3d"] %></a></td>
-        <td class="number"><a href="cleaner_list?c=<%=klass%>&f=168"><%= count["7d"] %></a></td>
-      </tr>
-    <% end %>
-    <tr class="total">
-      <td>Total</td>
-      <td class="number"><a href="cleaner_list"><%= @total["total"] %></a></td>
-      <td class="number"><a href="cleaner_list?f=1"><%= @total["1h"] %></a></td>
-      <td class="number"><a href="cleaner_list?f=3"><%= @total["3h"] %></a></td>
-      <td class="number"><a href="cleaner_list?f=24"><%= @total["1d"] %></a></td>
-      <td class="number"><a href="cleaner_list?f=72"><%= @total["3d"] %></a></td>
-      <td class="number"><a href="cleaner_list?f=168"><%= @total["7d"] %></a></td>
-    </tr>
-  </table>
+  <% @type = 'klass' %>
+  <% @q = 'c' %>
+  <%= erb File.read(ResqueCleaner::Server.erb_path("_stats.erb")) %>
+
+  <div class="title clearfix">
+    <h1>Job Exceptions Failed</h1>
+  </div>
+  <% @type = 'exception' %>
+  <% @q = 'ex' %>
+  <%= erb File.read(ResqueCleaner::Server.erb_path("_stats.erb")) %>
 
   <% if @cleaner.limiter.on? %>
     <%= erb File.read(ResqueCleaner::Server.erb_path("_limiter.erb")) %>
