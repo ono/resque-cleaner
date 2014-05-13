@@ -24,6 +24,9 @@
         <span class="regex_filter">
           Regex: <%= text_filter("filter_regex", "regex", Rack::Utils.escape_html(@regex))%>
         </span>
+        <span class="max_failures_filter">
+          Max Failures: <%= text_filter("max_failures", "max", Rack::Utils.escape_html(@max_failures))%>
+        </span>
         <input type="submit" value="Filter" />
       </form>
     </div>

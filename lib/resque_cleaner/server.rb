@@ -146,10 +146,14 @@ module ResqueCleaner
 
           block = filter_block
 
-          @failed = cleaner.select(&block).reverse
+          if @max_failures && @max_failures.respond_to?(:to_i)
+            cleaner.limiter.maximum = @max_failures.to_i
+          end
 
+          @failed = cleaner.select(&block).reverse
+          
           url = "cleaner_list?c=#{@klass}&ex=#{@exception}&f=#{@from}&t=#{@to}&regex=#{URI.encode(@regex || "")}"
-          @dump_url = "cleaner_dump?c=#{@klass}&ex=#{@exception}&f=#{@from}&t=#{@to}&regex=#{URI.encode(@regex || "")}"
+          @dump_url = "cleaner_dump?c=#{@klass}&ex=#{@exception}&f=#{@from}&t=#{@to}&regex=#{URI.encode(@regex || "")}&max=#{URI.encode(@max_failures || "")}"
           @paginate = Paginate.new(@failed, url, params[:p].to_i)
 
           @klasses = cleaner.stats_by_class.keys
@@ -225,6 +229,7 @@ module ResqueCleaner
       @klass = params[:c]=="" ? nil : params[:c]
       @exception = params[:ex]=="" ? nil : params[:ex]
       @regex = params[:regex]=="" ? nil : params[:regex]
+      @max_failures = params[:max]=="" ? nil : params[:max]
     end
 
     def filter_block
