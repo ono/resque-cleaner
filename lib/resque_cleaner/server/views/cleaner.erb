@@ -2,7 +2,7 @@
 
 <div class="cleaner">
   <div class="title clearfix">
-    <h1>Job Classes Failed</h1>
+    <h1>Group by class</h1>
   </div>
 
   <% @type = 'klass' %>
@@ -10,7 +10,7 @@
   <%= erb File.read(ResqueCleaner::Server.erb_path("_stats.erb")) %>
 
   <div class="title clearfix">
-    <h1>Job Exceptions Failed</h1>
+    <h1>Group by exception</h1>
   </div>
   <% @type = 'exception' %>
   <% @q = 'ex' %>
