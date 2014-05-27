@@ -1,3 +1,10 @@
+## 0.3.0 (2014-05-27)
+
+* Search by regex (#27)
+* Show stats by exception (#29)
+* Stop supporting ruby 1.8.x and 1.9.2
+* Escape query parameters (#30)
+
 ## 0.2.12 (2013-12-03)
 
 * Remove Resque::Helpers include (#23)
