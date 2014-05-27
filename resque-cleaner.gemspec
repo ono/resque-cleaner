@@ -21,6 +21,7 @@ Gem::Specification.new do |s|
   s.add_dependency "resque", "~> 1.0"
 
   s.add_development_dependency "minitest", "~> 5.0"
+  s.add_development_dependency "rack-test", "~> 0.6.0"
 
   s.description = <<DESCRIPTION
     resque-cleaner maintains the cleanliness of failed jobs on Resque.
