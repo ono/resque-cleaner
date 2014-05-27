@@ -7,6 +7,7 @@ Gem::Specification.new do |s|
   s.email             = "ononoma@gmail.com"
   s.authors           = [ "Tatsuya Ono" ]
   s.license           = "MIT"
+  s.required_ruby_version = '>= 1.9.3'
 
   s.files             = %w( README.md CHANGELOG.md Rakefile LICENSE )
   s.files            += Dir.glob("lib/**/*")
