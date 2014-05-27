@@ -146,14 +146,13 @@ module ResqueCleaner
         get "/cleaner_list" do
           load_library
           load_cleaner_filter
+          build_urls
 
           block = filter_block
 
           @failed = cleaner.select(&block).reverse
 
-          url = "cleaner_list?c=#{@klass}&ex=#{@exception}&f=#{@from}&t=#{@to}&regex=#{URI.encode(@regex || "")}"
-          @dump_url = "cleaner_dump?c=#{@klass}&ex=#{@exception}&f=#{@from}&t=#{@to}&regex=#{URI.encode(@regex || "")}"
-          @paginate = Paginate.new(@failed, url, params[:p].to_i)
+          @paginate = Paginate.new(@failed, @list_url, params[:p].to_i)
 
           @klasses = cleaner.stats_by_class.keys
           @exceptions = cleaner.stats_by_exception.keys
@@ -165,6 +164,7 @@ module ResqueCleaner
         post "/cleaner_exec" do
           load_library
           load_cleaner_filter
+          build_urls
 
           if params[:select_all_pages]!="1"
             @sha1 = {}
@@ -180,7 +180,6 @@ module ResqueCleaner
             when "retry" then cleaner.requeue(false,{},&block)
             end
 
-          @url = "cleaner_list?c=#{@klass}&ex=#{@exception}&f=#{@from}&t=#{@to}"
           erb File.read(ResqueCleaner::Server.erb_path('cleaner_exec.erb'))
         end
 
@@ -228,6 +227,19 @@ module ResqueCleaner
       @klass = params[:c]=="" ? nil : params[:c]
       @exception = params[:ex]=="" ? nil : params[:ex]
       @regex = params[:regex]=="" ? nil : params[:regex]
+    end
+
+    def build_urls
+      params = {
+        c: @klass,
+        ex: @exception,
+        f: @from,
+        t: @to,
+        regex: @regex
+      }.map {|key,value| "#{key}=#{URI.encode(value.to_s)}"}.join("&")
+
+      @list_url = "cleaner_list?#{params}"
+      @dump_url = "cleaner_dump?#{params}"
     end
 
     def filter_block

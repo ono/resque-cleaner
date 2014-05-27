@@ -10,13 +10,26 @@
   </tr>
   <% @stats[type.to_sym].each do |field,count| %>
     <tr>
+      <% filter = "#{q}=#{URI.encode(field)}" %>
       <td><%= field %></td>
-      <td class="number"><a href="cleaner_list?<%=q%>=<%=field%>"><%= count[:total] %></a></td>
-      <td class="number"><a href="cleaner_list?<%=q%>=<%=field%>&f=1"><%= count[:h1] %></a></td>
-      <td class="number"><a href="cleaner_list?<%=q%>=<%=field%>&f=3"><%= count[:h3] %></a></td>
-      <td class="number"><a href="cleaner_list?<%=q%>=<%=field%>&f=24"><%= count[:d1] %></a></td>
-      <td class="number"><a href="cleaner_list?<%=q%>=<%=field%>&f=72"><%= count[:d3] %></a></td>
-      <td class="number"><a href="cleaner_list?<%=q%>=<%=field%>&f=168"><%= count[:d7] %></a></td>
+      <td class="number">
+        <a href="cleaner_list?<%=filter%>"><%= count[:total] %></a>
+      </td>
+      <td class="number">
+        <a href="cleaner_list?<%=filter%>&f=1"><%= count[:h1] %></a>
+      </td>
+      <td class="number">
+        <a href="cleaner_list?<%=filter%>&f=3"><%= count[:h3] %></a>
+      </td>
+      <td class="number">
+        <a href="cleaner_list?<%=filter%>&f=24"><%= count[:d1] %></a>
+      </td>
+      <td class="number">
+        <a href="cleaner_list?<%=filter%>&f=72"><%= count[:d3] %></a>
+      </td>
+      <td class="number">
+        <a href="cleaner_list?<%=filter%>&f=168"><%= count[:d7] %></a>
+      </td>
     </tr>
   <% end %>
   <tr class="total">
