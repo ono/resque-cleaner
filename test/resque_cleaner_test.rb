@@ -28,6 +28,18 @@ context "ResqueCleaner" do
     @cleaner.print_message = false
   end
 
+  test "#select_by_regex returns only Jason jobs" do
+    ret = @cleaner.select_by_regex(/Jason/)
+    assert_equal 13, ret.size
+  end
+
+  test "#select_by_regex returns an empty array if passed a non-regex" do
+    ['string', nil, 13, Class.new].each do |non_regex|
+      ret = @cleaner.select_by_regex(nil)
+      assert_equal 0, ret.size
+    end
+  end
+
   test "#select returns failure jobs" do
     ret = @cleaner.select
     assert_equal 42, ret.size

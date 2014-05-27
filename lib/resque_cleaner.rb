@@ -90,6 +90,12 @@ module Resque
       end
       alias :failure_jobs :select
 
+      def select_by_regex(regex)
+        select do |job|
+          job.to_s =~ regex
+        end
+      end
+
       # Clears every jobs for which block evaluates to true.
       def clear(&block)
         cleared = 0
