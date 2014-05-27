@@ -18,6 +18,8 @@ end
 require 'resque'
 require 'resque_cleaner'
 
+$TEST_PID = Process.pid
+
 #
 # make sure we can run redis
 #
@@ -34,11 +36,14 @@ end
 # kill it when they end
 #
 MiniTest.after_run {
-  pid = `ps -A -o pid,command | grep [r]edis-test`.split(" ")[0]
-  puts "Killing test redis server..."
-  Process.kill("KILL", pid.to_i)
-  dump = "test/dump.rdb"
-  File.delete(dump) if File.exist?(dump)
+  if Process.pid == $TEST_PID
+    processes = `ps -A -o pid,command | grep [r]edis-test`.split($/)
+    pids = processes.map { |process| process.split(" ")[0] }
+    puts "Killing test redis server..."
+    pids.each { |pid| Process.kill("TERM", pid.to_i) }
+    dump = "test/dump.rdb"
+    File.delete(dump) if File.exist?(dump)
+  end
 }
 
 puts "Starting redis for testing at localhost:9736..."
