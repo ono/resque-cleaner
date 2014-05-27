@@ -5,16 +5,19 @@
     <h1>Group by class</h1>
   </div>
 
-  <% @type = 'klass' %>
-  <% @q = 'c' %>
-  <%= erb File.read(ResqueCleaner::Server.erb_path("_stats.erb")) %>
+  <%= erb(
+        File.read(ResqueCleaner::Server.erb_path("_stats.erb")),
+        locals: {q: 'c', type: 'klass'}
+      ) %>
 
   <div class="title clearfix">
     <h1>Group by exception</h1>
   </div>
-  <% @type = 'exception' %>
-  <% @q = 'ex' %>
-  <%= erb File.read(ResqueCleaner::Server.erb_path("_stats.erb")) %>
+
+  <%= erb(
+        File.read(ResqueCleaner::Server.erb_path("_stats.erb")),
+        locals: {q: 'ex', type: 'exception'}
+      ) %>
 
   <% if @cleaner.limiter.on? %>
     <%= erb File.read(ResqueCleaner::Server.erb_path("_limiter.erb")) %>
