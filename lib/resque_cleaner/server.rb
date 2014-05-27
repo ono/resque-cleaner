@@ -122,8 +122,8 @@ module ResqueCleaner
             @stats[:exception][exception] ||= Hash.new(0)
 
             [
-              @stats[:klass][klass], 
-              @stats[:exception][exception], 
+              @stats[:klass][klass],
+              @stats[:exception][exception],
               @total
             ].each do |stat|
               stat[:total] += 1
