@@ -48,6 +48,19 @@ module Resque
         stats
       end
 
+      # Stats by queue.
+      def stats_by_queue(&block)
+        jobs, stats = select(&block), {}
+        jobs.each do |job|
+          queue = job["queue"] || "UNKNOWN"
+          stats[queue] ||= 0
+          stats[queue] += 1
+        end
+
+        print_stats(stats) if print?
+        stats
+      end
+
       # Stats by class.
       def stats_by_class(&block)
         jobs, stats = select(&block), {}

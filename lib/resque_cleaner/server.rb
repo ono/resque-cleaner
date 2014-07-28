@@ -80,6 +80,16 @@ module ResqueCleaner
             html += "</select>"
           end
 
+          def queue_filter(id, name, queues, value)
+            html = "<select id=\"#{id}\" name=\"#{name}\">"
+            html += "<option value=\"\">-</option>"
+            queues.each do |q|
+              selected = q == value ? 'selected="selected"' : ''
+              html += "<option #{selected} value=\"#{q}\">#{q}</option>"
+            end
+            html += "</select>"
+          end
+
           def class_filter(id, name, klasses, value)
             html = "<select id=\"#{id}\" name=\"#{name}\">"
             html += "<option value=\"\">-</option>"
@@ -117,18 +127,21 @@ module ResqueCleaner
           load_cleaner_filter
 
           @jobs = cleaner.select
-          @stats = { :klass => {}, :exception => {} }
+          @stats = { klass: {}, exception: {}, queue: {} }
           @total = Hash.new(0)
           @jobs.each do |job|
             klass = job["payload"]["class"] || 'UNKNOWN'
             exception = job["exception"] || 'UNKNOWN'
+            queue = job["queue"] || 'UNKNOWN'
             failed_at = Time.parse job["failed_at"]
             @stats[:klass][klass] ||= Hash.new(0)
             @stats[:exception][exception] ||= Hash.new(0)
+            @stats[:queue][queue] ||= Hash.new(0)
 
             [
               @stats[:klass][klass],
               @stats[:exception][exception],
+              @stats[:queue][queue],
               @total
             ].each do |stat|
               stat[:total] += 1
@@ -156,6 +169,7 @@ module ResqueCleaner
 
           @klasses = cleaner.stats_by_class.keys
           @exceptions = cleaner.stats_by_exception.keys
+          @queues = cleaner.stats_by_queue.keys
           @count = cleaner.select(&block).size
 
           erb File.read(ResqueCleaner::Server.erb_path('cleaner_list.erb'))
@@ -226,6 +240,7 @@ module ResqueCleaner
       @to = params[:t]=="" ? nil : params[:t]
       @klass = params[:c]=="" ? nil : params[:c]
       @exception = params[:ex]=="" ? nil : params[:ex]
+      @queue = params[:q]=="" ? nil : params[:q]
       @regex = params[:regex]=="" ? nil : params[:regex]
     end
 
@@ -247,6 +262,7 @@ module ResqueCleaner
         (!@from || j.after?(hours_ago(@from))) &&
         (!@to || j.before?(hours_ago(@to))) &&
         (!@klass || j.klass?(@klass)) &&
+        (!@queue || j.queue?(@queue)) &&
         (!@exception || j.exception?(@exception)) &&
         (!@sha1 || @sha1[Digest::SHA1.hexdigest(j.to_json)]) &&
         (!@regex || j.to_s =~ /#{@regex}/)
