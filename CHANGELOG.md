@@ -1,3 +1,7 @@
+## 0.3.1 (2016-01-28)
+
+* Bug fix: fix the issue regex is not applied on bulk clearance (#36)
+
 ## 0.3.0 (2014-05-27)
 
 * Search by regex (#27)
