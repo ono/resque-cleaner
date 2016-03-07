@@ -120,7 +120,7 @@ module ResqueCleaner
           @stats = { :klass => {}, :exception => {} }
           @total = Hash.new(0)
           @jobs.each do |job|
-            klass = job["payload"]["class"] || 'UNKNOWN'
+            klass = job["payload"].to_h["class"] || 'UNKNOWN'
             exception = job["exception"] || 'UNKNOWN'
             failed_at = Time.parse job["failed_at"]
             @stats[:klass][klass] ||= Hash.new(0)
