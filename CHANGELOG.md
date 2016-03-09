@@ -1,3 +1,7 @@
+## 0.3.2 (2016-03-09)
+
+* Handle failure JSON with nil on payload safely (#40)
+
 ## 0.3.1 (2016-01-28)
 
 * Bug fix: fix the issue regex is not applied on bulk clearance (#36)
