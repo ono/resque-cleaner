@@ -2,53 +2,53 @@
 
   <ul class="pagination">
     <li class="summary">
-      <%= @paginate.first_index%> - <%= @paginate.last_index%> / <%= @paginate.total_size%>
+      <%= @paginate.first_index %> - <%= @paginate.last_index %> / <%= @paginate.total_size %>
     </li>
-    <% if @paginate.max_page>1 %>
+    <% if @paginate.max_page >1 %>
       <% if @paginate.first_page? %>
         <li class="prev off">&lt;&lt;newer</li>
       <% else %>
         <li class="prev"><a href="<%= @paginate.page_url(:prev)%>">&lt;&lt;newer</a></li>
       <% end %>
 
-      <% 1.upto(6<@paginate.max_page ? 6 : @paginate.max_page) do |pg| %>
+      <% 1.upto(6 < @paginate.max_page ? 6 : @paginate.max_page) do |pg| %>
         <% if @paginate.page==pg %>
-          <li class="current"><%=pg%></li>
+          <li class="current"><%= pg %></li>
         <% else %>
-          <li><a href="<%= @paginate.page_url(pg)%>"><%=pg%></a></li>
+          <li><a href="<%= @paginate.page_url(pg) %>"><%= pg %></a></li>
         <% end %>
       <% end %>
 
       <% if @paginate.max_page > 6 %>
-        <% if @paginate.max_page!=@paginate.page %>
+        <% if @paginate.max_page != @paginate.page %>
           <% if @paginate.page>7 %>
             <li class="off">...</li>
           <% end %>
-          <% if @paginate.page>6 %>
-            <li class="current"><%=@paginate.page%></li>
+          <% if @paginate.page > 6 %>
+            <li class="current"><%= @paginate.page %></li>
           <% end %>
         <% end %>
-        <% if @paginate.max_page>7 && @paginate.page+1!=@paginate.max_page %>
+        <% if @paginate.max_page > 7 && @paginate.page + 1 != @paginate.max_page %>
           <li class="off">...</li>
         <% end %>
 
-        <% if @paginate.max_page==@paginate.page %>
-          <li class="current"><%=@paginate.max_page%></li>
+        <% if @paginate.max_page == @paginate.page %>
+          <li class="current"><%= @paginate.max_page %></li>
         <% else %>
-          <li><a href="<%= @paginate.page_url(@paginate.max_page)%>"><%=@paginate.max_page%></a></li>
+          <li><a href="<%= @paginate.page_url(@paginate.max_page)%>"><%= @paginate.max_page %></a></li>
         <% end %>
       <% end %>
 
       <% if @paginate.last_page? %>
         <li class="next off">older&gt;&gt;</li>
       <% else %>
-        <li class="next"><a href="<%= @paginate.page_url(:next)%>">older&gt;&gt;</a></li>
+        <li class="next"><a href="<%= @paginate.page_url(:next) %>">older&gt;&gt;</a></li>
       <% end %>
     <% end %>
 
   </ul>
     <div class="dump">
-        <a href="<%= @dump_url%>" target="_blank">Dump</a>
+        <a href="<%= @dump_url %>" target="_blank">Dump</a>
     </div>
 </div>
 

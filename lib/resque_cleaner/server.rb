@@ -19,7 +19,7 @@ module ResqueCleaner
         @jobs = jobs
         @url = url
         @page = (!page || page < 1) ? 1 : page
-        @page_size = 20
+        @page_size = page_size
       end
 
       def first_index
@@ -28,11 +28,11 @@ module ResqueCleaner
 
       def last_index
         last = first_index + @page_size - 1
-        last > @jobs.size-1 ? @jobs.size-1 : last
+        last > @jobs.size - 1 ? @jobs.size - 1 : last
       end
 
       def paginated_jobs
-        @jobs[first_index,@page_size]
+        @jobs[first_index, @page_size]
       end
 
       def first_page?
@@ -58,7 +58,7 @@ module ResqueCleaner
       end
 
       def max_page
-        ((total_size-1) / @page_size) + 1
+        ((total_size - 1) / @page_size) + 1
       end
     end
 
@@ -151,15 +151,34 @@ module ResqueCleaner
 
           block = filter_block
 
-          @failed = cleaner.select(&block).reverse
+          selected_jobs = cleaner.select(&block)
+          @failed = selected_jobs.reverse
+          @count = selected_jobs.size
 
           @paginate = Paginate.new(@failed, @list_url, params[:p].to_i)
 
-          @klasses = cleaner.stats_by_class.keys
-          @exceptions = cleaner.stats_by_exception.keys
-          @count = cleaner.select(&block).size
+          all_stats = cleaner.get_all_stats
+          @klasses = all_stats[:klass].keys
+          @exceptions = all_stats[:exception].keys
 
           erb File.read(ResqueCleaner::Server.erb_path('cleaner_list.erb'))
+        end
+
+        get "/cleaner_one" do
+          load_library
+          load_cleaner_filter
+          set_failed_list_indexes
+
+          @total = cleaner.failure.count
+
+          block = filter_block
+
+          selected_jobs = cleaner.select(&block)
+          @failed = selected_jobs.reverse
+
+          @count = selected_jobs.size
+
+          erb File.read(ResqueCleaner::Server.erb_path('cleaner_one.erb'))
         end
 
         post "/cleaner_exec" do
@@ -244,7 +263,7 @@ module ResqueCleaner
     end
 
     def filter_block
-      block = lambda{|j|
+      lambda{|j|
         (!@from || j.after?(hours_ago(@from))) &&
         (!@to || j.before?(hours_ago(@to))) &&
         (!@klass || j.klass?(@klass)) &&
@@ -252,6 +271,15 @@ module ResqueCleaner
         (!@sha1 || @sha1[Digest::SHA1.hexdigest(j.to_json)]) &&
         (!@regex || j.to_s =~ /#{@regex}/)
       }
+    end
+
+    def set_failed_list_indexes
+      failed_start_index = params[:fsi].present? ? params[:fsi].to_i : nil
+      count_failed = params[:cf].present? ? params[:cf].to_i : nil
+      return unless failed_start_index && count_failed
+
+      cleaner.limiter.start_offset = failed_start_index
+      cleaner.limiter.count_failed = count_failed
     end
 
     def hours_ago(h)
@@ -264,4 +292,3 @@ end
 Resque::Server.class_eval do
   include ResqueCleaner::Server
 end
-
