@@ -53,11 +53,32 @@ describe "resque-web" do
     assert last_response.body.include?('"BadJob"')
   end
 
+  it '#cleaner_one shows the failed jobs' do
+    get "/cleaner_one"
+    assert_includes last_response.body, 'BadJob'
+  end
+
+  it '#cleaner_one shows the failed jobs for a class' do
+    get "/cleaner_one", :c => "BadJobWithSyntaxError"
+    assert_includes last_response.body, 'BadJobWithSyntaxError'
+  end
+
+  it '#cleaner_one shows only the first failed job for index 0' do
+    get "/cleaner_one", :fsi => "0", :cf => "1"
+    assert_includes last_response.body, 'BadJobWithSyntaxError'
+  end
+
+  it '#cleaner_one shows only the first failed job for index 1' do
+    get "/cleaner_one", :fsi => "1", :cf => "1"
+    assert_includes last_response.body, 'BadJob'
+    assert_equal false, last_response.body.include?('BadJobWithSyntaxError')
+  end
 
   it '#cleaner_exec clears job' do
     post "/cleaner_exec", :action => "clear", :sha1 => Digest::SHA1.hexdigest(@cleaner.select[0].to_json)
     assert_equal 10, @cleaner.select.size
   end
+
   it "#cleaner_dump should respond with success" do
     get "/cleaner_dump"
     assert last_response.ok?, last_response.errors

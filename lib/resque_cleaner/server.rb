@@ -274,8 +274,8 @@ module ResqueCleaner
     end
 
     def set_failed_list_indexes
-      failed_start_index = params[:fsi].present? ? params[:fsi].to_i : nil
-      count_failed = params[:cf].present? ? params[:cf].to_i : nil
+      failed_start_index = params[:fsi].nil? ? nil : params[:fsi].to_i
+      count_failed = params[:cf].nil? ? nil : params[:cf].to_i
       return unless failed_start_index && count_failed
 
       cleaner.limiter.start_offset = failed_start_index
