@@ -155,7 +155,7 @@ describe "ResqueCleaner" do
     # with block
     ret = @cleaner.stats_by_date{|j| j['payload']['args']==['Jason']}
     assert_equal 2, ret['2009/03/13']
-    assert_equal nil, ret['2009/11/13']
+    assert_nil ret['2009/11/13']
     assert_equal 11, ret['2010/08/13']
   end
 
@@ -163,6 +163,19 @@ describe "ResqueCleaner" do
     ret = @cleaner.stats_by_class
     assert_equal 35, ret['BadJob']
     assert_equal 7, ret['BadJobWithSyntaxError']
+  end
+
+  it "#get all stats returns stats grouped by class, exeption and date" do
+    ret = @cleaner.get_all_stats
+
+    assert_equal 35, ret[:klass]['BadJob']
+    assert_equal 7, ret[:klass]['BadJobWithSyntaxError']
+
+    assert_equal 6, ret[:date]['2009/03/13']
+    assert_equal 14, ret[:date]['2009/11/13']
+
+    assert_equal 35, ret[:exception]['RuntimeError']
+    assert_equal 7, ret[:exception]['SyntaxError']
   end
 
   it "#stats_by_class works with broken log" do
