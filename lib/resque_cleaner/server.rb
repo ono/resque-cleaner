@@ -1,3 +1,5 @@
+require 'yaml'
+
 # Extends Resque Web Based UI.
 # Structure has been borrowed from ResqueScheduler.
 module ResqueCleaner
@@ -17,7 +19,7 @@ module ResqueCleaner
         @jobs = jobs
         @url = url
         @page = (!page || page < 1) ? 1 : page
-        @page_size = 20
+        @page_size = page_size
       end
 
       def first_index
@@ -26,11 +28,11 @@ module ResqueCleaner
 
       def last_index
         last = first_index + @page_size - 1
-        last > @jobs.size-1 ? @jobs.size-1 : last
+        last > @jobs.size - 1 ? @jobs.size - 1 : last
       end
 
       def paginated_jobs
-        @jobs[first_index,@page_size]
+        @jobs[first_index, @page_size]
       end
 
       def first_page?
@@ -56,7 +58,7 @@ module ResqueCleaner
       end
 
       def max_page
-        ((total_size-1) / @page_size) + 1
+        ((total_size - 1) / @page_size) + 1
       end
     end
 
@@ -97,6 +99,15 @@ module ResqueCleaner
             end
             html += "</select>"
           end
+
+          def show_job_args(args)
+            Array(args).map { |a| a.inspect }.join("\n")
+          end
+
+          def text_filter(id, name, value)
+            html = "<input id=\"#{id}\"  type=\"text\" name=\"#{name}\" value=\"#{value}\">"
+            html += "</input>"
+          end
         end
 
         mime_type :json, 'application/json'
@@ -106,24 +117,28 @@ module ResqueCleaner
           load_cleaner_filter
 
           @jobs = cleaner.select
-          @stats, @total = {}, {"total" => 0, "1h" => 0, "3h" => 0, "1d" => 0, "3d" => 0, "7d" => 0}
+          @stats = { :klass => {}, :exception => {} }
+          @total = Hash.new(0)
           @jobs.each do |job|
-            klass = if job["payload"] && job["payload"]["class"]
-              job["payload"]["class"]
-            else
-              "UNKNOWN"
-            end
+            payload = job["payload"] || {}
+            klass = payload["class"] || 'UNKNOWN'
+            exception = job["exception"] || 'UNKNOWN'
             failed_at = Time.parse job["failed_at"]
+            @stats[:klass][klass] ||= Hash.new(0)
+            @stats[:exception][exception] ||= Hash.new(0)
 
-            @stats[klass] ||= {"total" => 0, "1h" => 0, "3h" => 0, "1d" => 0, "3d" => 0, "7d" => 0}
-            items = [@stats[klass],@total]
-
-            items.each{|a| a["total"] += 1}
-            items.each{|a| a["1h"] += 1} if failed_at >= hours_ago(1)
-            items.each{|a| a["3h"] += 1} if failed_at >= hours_ago(3)
-            items.each{|a| a["1d"] += 1} if failed_at >= hours_ago(24)
-            items.each{|a| a["3d"] += 1} if failed_at >= hours_ago(24*3)
-            items.each{|a| a["7d"] += 1} if failed_at >= hours_ago(24*7)
+            [
+              @stats[:klass][klass],
+              @stats[:exception][exception],
+              @total
+            ].each do |stat|
+              stat[:total] += 1
+              stat[:h1] += 1 if failed_at >= hours_ago(1)
+              stat[:h3] += 1 if failed_at >= hours_ago(3)
+              stat[:d1] += 1 if failed_at >= hours_ago(24)
+              stat[:d3] += 1 if failed_at >= hours_ago(24*3)
+              stat[:d7] += 1 if failed_at >= hours_ago(24*7)
+            end
           end
 
           erb File.read(ResqueCleaner::Server.erb_path('cleaner.erb'))
@@ -132,25 +147,44 @@ module ResqueCleaner
         get "/cleaner_list" do
           load_library
           load_cleaner_filter
+          build_urls
 
           block = filter_block
 
-          @failed = cleaner.select(&block).reverse
+          selected_jobs = cleaner.select(&block)
+          @failed = selected_jobs.reverse
+          @count = selected_jobs.size
 
-          url = "cleaner_list?c=#{@klass}&ex=#{@exception}&f=#{@from}&t=#{@to}"
-          @dump_url = "cleaner_dump?c=#{@klass}&ex=#{@exception}&f=#{@from}&t=#{@to}"
-          @paginate = Paginate.new(@failed, url, params[:p].to_i)
+          @paginate = Paginate.new(@failed, @list_url, params[:p].to_i)
 
-          @klasses = cleaner.stats_by_class.keys
-          @exceptions = cleaner.stats_by_exception.keys
-          @count = cleaner.select(&block).size
+          all_stats = cleaner.get_all_stats
+          @klasses = all_stats[:klass].keys
+          @exceptions = all_stats[:exception].keys
 
           erb File.read(ResqueCleaner::Server.erb_path('cleaner_list.erb'))
+        end
+
+        get "/cleaner_one" do
+          load_library
+          load_cleaner_filter
+          set_failed_list_indexes
+
+          @total = cleaner.failure.count
+
+          block = filter_block
+
+          selected_jobs = cleaner.select(&block)
+          @failed = selected_jobs.reverse
+
+          @count = selected_jobs.size
+
+          erb File.read(ResqueCleaner::Server.erb_path('cleaner_one.erb'))
         end
 
         post "/cleaner_exec" do
           load_library
           load_cleaner_filter
+          build_urls
 
           if params[:select_all_pages]!="1"
             @sha1 = {}
@@ -166,7 +200,6 @@ module ResqueCleaner
             when "retry" then cleaner.requeue(false,{},&block)
             end
 
-          @url = "cleaner_list?c=#{@klass}&ex=#{@exception}&f=#{@from}&t=#{@to}"
           erb File.read(ResqueCleaner::Server.erb_path('cleaner_exec.erb'))
         end
 
@@ -213,16 +246,40 @@ module ResqueCleaner
       @to = params[:t]=="" ? nil : params[:t]
       @klass = params[:c]=="" ? nil : params[:c]
       @exception = params[:ex]=="" ? nil : params[:ex]
+      @regex = params[:regex]=="" ? nil : params[:regex]
+    end
+
+    def build_urls
+      params = {
+        c: @klass,
+        ex: @exception,
+        f: @from,
+        t: @to,
+        regex: @regex
+      }.map {|key,value| "#{key}=#{URI.encode(value.to_s)}"}.join("&")
+
+      @list_url = "cleaner_list?#{params}"
+      @dump_url = "cleaner_dump?#{params}"
     end
 
     def filter_block
-      block = lambda{|j|
+      lambda{|j|
         (!@from || j.after?(hours_ago(@from))) &&
         (!@to || j.before?(hours_ago(@to))) &&
         (!@klass || j.klass?(@klass)) &&
         (!@exception || j.exception?(@exception)) &&
-        (!@sha1 || @sha1[Digest::SHA1.hexdigest(j.to_json)])
+        (!@sha1 || @sha1[Digest::SHA1.hexdigest(j.to_json)]) &&
+        (!@regex || j.to_s =~ /#{@regex}/)
       }
+    end
+
+    def set_failed_list_indexes
+      failed_start_index = params[:fsi].nil? ? nil : params[:fsi].to_i
+      count_failed = params[:cf].nil? ? nil : params[:cf].to_i
+      return unless failed_start_index && count_failed
+
+      cleaner.limiter.start_offset = failed_start_index
+      cleaner.limiter.count_failed = count_failed
     end
 
     def hours_ago(h)
@@ -235,4 +292,3 @@ end
 Resque::Server.class_eval do
   include ResqueCleaner::Server
 end
-

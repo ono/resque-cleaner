@@ -1,3 +1,30 @@
+## 0.3.2 (2016-03-09)
+
+* Handle failure JSON with nil on payload safely (#40)
+
+## 0.3.1 (2016-01-28)
+
+* Bug fix: fix the issue regex is not applied on bulk clearance (#36)
+
+## 0.3.0 (2014-05-27)
+
+* Search by regex (#27)
+* Show stats by exception (#29)
+* Stop supporting ruby 1.8.x and 1.9.2
+* Escape query parameters (#30)
+
+## 0.2.12 (2013-12-03)
+
+* Remove Resque::Helpers include (#23)
+* Tweak Gemspec (#24)
+* Don't use yaml format to show arguments
+* Tweak README
+
+## 0.2.11 (2013-07-19)
+
+* Use transaction for retry-and-clear (#22).
+* Fix for CI
+
 ## 0.2.10 (2012-10-15)
 
 * Bug fix: use URL helper to support resque-web which is not hosted under '/'.

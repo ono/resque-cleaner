@@ -1,0 +1,83 @@
+<link href="cleaner/public/cleaner.css" media="screen" rel="stylesheet" type="text/css">
+
+<div class="cleaner">
+  <div class="title clearfix">
+    <h1>Failed Jobs</h1>
+  </div>
+
+  <div class="clearfix">
+    <span class="start-indexes">
+        <% (0..@total).each do |index| %>
+          <% next unless index % 10 == 0 %>
+          <a href='javascript:void(0)' onclick='calcHref(<%= index %>)'><%= index %></a>
+        <% end %>
+    </span>
+  </div>
+
+  <% index = 0 %>
+  <% date_format = "%Y/%m/%d %T %z" %>
+
+  <% if @failed.size > 0 %>
+      <ul class='failed'>
+        <% @failed.each do |job| %>
+            <% index += 1 %>
+            <li>
+              <dl>
+                <% if job.nil? %>
+                    <dt>Error</dt>
+                    <dd>Job <%= index %> could not be parsed; perhaps it contains invalid JSON?</dd>
+                <% else %>
+                    <dd>&nbsp;</dd>
+                    <dt>Worker</dt>
+                    <dd>
+                      <span><%= job['worker'].split(':')[0...2].join(':') %></span> on
+                      <b class='queue-tag'><%= job['queue'] %></b >
+                      at <b><span class="time"><%= Time.parse(job['failed_at']).strftime(date_format) %></span></b>
+                      <% if job['retried_at'] %>
+                          <div class='retried'>
+                            Retried <b><span class="time"><%= job['retried_at'] %></span></b>
+                          </div>
+                      <% end %>
+                    </dd>
+                    <dt>Class</dt>
+                    <dd><code><%= job['payload'] ? "<a href='?c=#{job['payload']['class']}&fsi=10&cf=50'></a>" : 'nil' %></code></dd>
+                    <dt>Arguments</dt>
+                    <dd><pre><%=h job['payload'] ? show_args(job['payload']['args']) : 'nil' %></pre></dd>
+                    <dt>Exception</dt>
+                    <dd><code><%= job['exception'] %></code></dd>
+                    <dt>Error</dt>
+                    <dd class='error'>
+                      <% if job['backtrace'] %>
+                          <a href="#" class="backtrace"><%= h(job['error']) %></a>
+                          <pre style='display:none'><%=h job['backtrace'].join("\n") %></pre>
+                      <% else %>
+                          <%=h job['error'] %>
+                      <% end %>
+                    </dd>
+                <% end %>
+              </dl>
+              <div class='r'>
+              </div>
+            </li>
+        <% end %>
+      </ul>
+  <% else %>
+      No match found
+  <% end %>
+</div>
+<script>
+    function calcHref(index) {
+        var newSearch = location.search.replace(/fsi=\d+/g, 'fsi=' + index);
+        if (!newSearch.match(/\?/)) {
+            newSearch = newSearch + '?';
+        }
+        if (!newSearch.match(/fsi=/)) {
+            newSearch = newSearch + '&fsi=' + index;
+        }
+        if (!newSearch.match(/cf=/)) {
+            newSearch = newSearch + '&cf=50';
+        }
+        location.href = location.origin + location.pathname + newSearch;
+        e.preventDefault();
+    }
+</script>

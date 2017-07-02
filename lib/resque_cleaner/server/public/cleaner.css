@@ -60,5 +60,15 @@
 #main .cleaner div.dump{
   float: right
 }
+#main .cleaner .start-indexes {
+  float: right;
+  padding: 7px;
+  background-color: #eee;
+  border-radius: 5px;
+  margin: 5px;
+  border: 1px solid #ccc;
+  text-decoration: none;
+}
+
 
 

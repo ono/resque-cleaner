@@ -7,7 +7,6 @@ module Resque
     # ResqueCleaner class provides useful functionalities to retry or clean
     # failed jobs. Let's clean up your failed list!
     class ResqueCleaner
-      include Resque::Helpers
       # ResqueCleaner fetches all elements from Redis and checks them
       # by linear when filtering them. Since there is a performance concern,
       # ResqueCleaner handles only the latest x(default 1000) jobs.
@@ -75,6 +74,26 @@ module Resque
         stats
       end
 
+      # Stats by exception & class & date.
+      def get_all_stats(&block)
+        jobs, stats = select(&block), { exception: {}, klass: {}, date: {} }
+        jobs.each do |job|
+          date = job["failed_at"][0,10]
+          stats[:date][date] ||= 0
+          stats[:date][date] += 1
+
+          exception = job["exception"]
+          stats[:exception][exception] ||= 0
+          stats[:exception][exception] += 1
+
+          klass = job["payload"] && job["payload"]["class"] ? job["payload"]["class"] : "UNKNOWN"
+          stats[:klass][klass] ||= 0
+          stats[:klass][klass] += 1
+        end
+
+        stats
+      end
+
       # Print stats
       def print_stats(stats)
         log too_many_message if @limiter.on?
@@ -86,10 +105,15 @@ module Resque
 
       # Returns every jobs for which block evaluates to true.
       def select(&block)
-        jobs = @limiter.jobs
-        block_given? ? @limiter.jobs.select(&block) : jobs
+        block_given? ? @limiter.jobs.select(&block) : @limiter.jobs
       end
       alias :failure_jobs :select
+
+      def select_by_regex(regex)
+        select do |job|
+          job.to_s =~ regex
+        end
+      end
 
       # Clears every jobs for which block evaluates to true.
       def clear(&block)
@@ -99,7 +123,7 @@ module Resque
             if !block_given? || block.call(job)
               index = @limiter.start_index + i - cleared
               # fetches again since you can't ensure that it is always true:
-              # a == endode(decode(a))
+              # a == encode(decode(a))
               value = redis.lindex(:failed, index)
               redis.lrem(:failed, 1, value)
               cleared += 1
@@ -118,17 +142,21 @@ module Resque
             if !block_given? || block.call(job)
               index = @limiter.start_index + i - requeued
 
-              if clear_after_requeue
-                # remove job
-                value = redis.lindex(:failed, index)
-                redis.lrem(:failed, 1, value)
-              else
-                # mark retried
-                job['retried_at'] = Time.now.strftime("%Y/%m/%d %H:%M:%S")
-                redis.lset(:failed, @limiter.start_index+i, Resque.encode(job))
+              value = redis.lindex(:failed, index)
+              redis.multi do
+                Job.create(queue||job['queue'], job['payload']['class'], *job['payload']['args'])
+
+                if clear_after_requeue
+                  # remove job
+                  # TODO: should use ltrim. not sure why i used lrem here...
+                  redis.lrem(:failed, 1, value)
+                else
+                  # mark retried
+                  job['retried_at'] = Time.now.strftime("%Y/%m/%d %H:%M:%S")
+                  redis.lset(:failed, @limiter.start_index+i, Resque.encode(job))
+                end
               end
 
-              Job.create(queue||job['queue'], job['payload']['class'], *job['payload']['args'])
               requeued += 1
             end
           end
@@ -144,7 +172,7 @@ module Resque
         c
       end
 
-      # Exntends job(Hash instance) with some helper methods.
+      # Extends job(Hash instance) with some helper methods.
       module FailedJobEx
         # Returns true if the job has been already retried. Otherwise returns
         # false.
@@ -204,7 +232,7 @@ module Resque
           end
         end
 
-        attr_accessor :maximum
+        attr_accessor :maximum, :start_offset, :count_failed
         def initialize(cleaner)
           @cleaner = cleaner
           @maximum = @@default_maximum
@@ -231,14 +259,16 @@ module Resque
         def jobs
           if @locked
             @jobs
+          elsif start_offset && count_failed
+            all(start_offset, count_failed)
           else
-            all( - count, count)
+            all(-count, count)
           end
         end
 
         # Wraps Resque's all and returns always array.
         def all(index=0,count=1)
-          jobs = @cleaner.failure.all( index, count)
+          jobs = @cleaner.failure.all(index, count)
           jobs = [] unless jobs
           jobs = [jobs] unless jobs.is_a?(Array)
           jobs.each{|j| j.extend FailedJobEx}
@@ -250,7 +280,7 @@ module Resque
           if @locked
             @start_index
           else
-            on? ? @cleaner.failure.count-@maximum : 0
+            on? ? @cleaner.failure.count - @maximum : 0
           end
         end
 
@@ -261,12 +291,12 @@ module Resque
 
           unless @locked
             total_count = @cleaner.failure.count
-            if total_count>@maximum
-              @start_index = total_count-@maximum
-              @jobs = all( @start_index, @maximum)
+            if total_count > @maximum
+              @start_index = total_count - @maximum
+              @jobs = all(@start_index, @maximum)
             else
               @start_index = 0
-              @jobs = all( 0, total_count)
+              @jobs = all(0, total_count)
             end
           end
 
@@ -295,4 +325,3 @@ module Resque
 end
 
 require 'resque_cleaner/server'
-

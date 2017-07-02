@@ -21,6 +21,9 @@
         <span class="time_filter">
           To: <%= time_filter("filter_to","t",@to)%>
         </span>
+        <span class="regex_filter">
+          Regex: <%= text_filter("filter_regex", "regex", Rack::Utils.escape_html(@regex))%>
+        </span>
         <input type="submit" value="Filter" />
       </form>
     </div>
@@ -35,6 +38,7 @@
           <input type="hidden" name="t" value="<%=@to%>" />
           <input type="hidden" name="p" value="<%=@paginate.page%>" />
           <input type="hidden" name="ex" value="<%=@exception%>" />
+          <input type="hidden" name="regex" value="<%=Rack::Utils.escape_html(@regex)%>" />
           <select id="form_action" name="action">
             <option id="default_option" value="" selected="selected">-- Select Action --</option>
             <option value="clear">Clear</option>
@@ -55,7 +59,6 @@
     </div>
   <% end %>
 
-  <% start = 0 %>
   <% failed = @paginate.paginated_jobs%>
   <% index = 0 %>
   <% date_format = "%Y/%m/%d %T %z" %>
@@ -63,7 +66,7 @@
   <% if @paginate.max_page > 0 %>
     <%= erb File.read(ResqueCleaner::Server.erb_path("_paginate.erb")) %>
     <ul class='failed'>
-      <%for job in failed%>
+      <% failed.each do |job| %>
         <% index += 1 %>
         <li>
           <dl>
@@ -87,7 +90,7 @@
             <dt>Class</dt>
             <dd><code><%= job['payload'] ? job['payload']['class'] : 'nil' %></code></dd>
             <dt>Arguments</dt>
-            <dd><pre><%=h job['payload'] ? show_args(job['payload']['args']) : 'nil' %></pre></dd>
+            <dd><pre><%=h job['payload'] ? show_job_args(job['payload']['args']) : 'nil' %></pre></dd>
             <dt>Exception</dt>
             <dd><code><%= job['exception'] %></code></dd>
             <dt>Error</dt>
@@ -104,7 +107,7 @@
           <div class='r'>
           </div>
         </li>
-      <%end%>
+      <% end %>
     </ul>
     <%= erb File.read(ResqueCleaner::Server.erb_path("_paginate.erb")) %>
   <% else %>
@@ -170,6 +173,6 @@
       $('#exec a').removeClass('disabled');
       $('.failed input').removeAttr('disabled');
     }
-  };
+  }
 
 </script>
