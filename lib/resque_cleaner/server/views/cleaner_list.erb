@@ -89,9 +89,15 @@
               <% end %>
             </dd>
             <dt>Class</dt>
-            <dd><code><%= job['payload'] ? job['payload']['class'] : 'nil' %></code></dd>
+            <dd><code><%= job['payload'] ? job['payload']['args'][0]['job_class'] : 'nil' %></code></dd>
             <dt>Arguments</dt>
-            <dd><pre><%=h job['payload'] ? show_job_args(job['payload']['args']) : 'nil' %></pre></dd>
+            <dd><pre><%=h job['payload'] ? show_job_args(job['payload']['args'][0]['arguments']) : 'nil' %></pre></dd>
+            <dt>Queue</dt>
+            <dd><pre><%=h job['payload'] ? show_job_args(job['payload']['args'][0]['queue_name']) : 'nil' %></pre></dd>
+            <dt>Executions</dt>
+            <dd><pre><%=h job['payload'] ? show_job_args(job['payload']['args'][0]['executions'].to_i) : 'nil' %></pre></dd>
+            <dt>Retry attempts</dt>
+            <dd><pre><%=h job['payload'] ? show_job_args(job['payload']['args'][0]['retry_attempt'].to_i) : 'nil' %></pre></dd>
             <dt>Exception</dt>
             <dd><code><%= job['exception'] %></code></dd>
             <dt>Error</dt>
