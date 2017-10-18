@@ -8,9 +8,6 @@ module ResqueCleaner
     def self.erb_path(filename)
       File.join(File.dirname(__FILE__), 'server', 'views', filename)
     end
-    def self.public_path(filename)
-      File.join(File.dirname(__FILE__), 'server', 'public', filename)
-    end
 
     # Pagination helper for list page.
     class Paginate
@@ -199,10 +196,6 @@ module ResqueCleaner
           cleaner.clear_stale
           redirect url_path(:cleaner)
         end
-
-        get /cleaner\/public\/([a-z]+\.[a-z]+)/ do
-          send_file ResqueCleaner::Server.public_path(params[:captures].first)
-        end
       end
 
     end
@@ -264,4 +257,3 @@ end
 Resque::Server.class_eval do
   include ResqueCleaner::Server
 end
-
