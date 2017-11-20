@@ -1,4 +1,4 @@
-<link href="cleaner/public/cleaner.css" media="screen" rel="stylesheet" type="text/css">
+<%= erb File.read(ResqueCleaner::Server.erb_path("_cleaner_styles.erb")) %>
 
 <!-- Many code was copied from failed.erb of the original resque -->
 <div class="cleaner">
