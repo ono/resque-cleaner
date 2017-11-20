@@ -1,3 +1,7 @@
+## 0.4.0 (2017-11-20)
+
+* Render CSS as ERB partial to make Rails 5 compatible (#45)
+
 ## 0.3.2 (2016-03-09)
 
 * Handle failure JSON with nil on payload safely (#40)
