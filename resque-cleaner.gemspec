@@ -18,7 +18,7 @@ Gem::Specification.new do |s|
   s.extra_rdoc_files  = [ "LICENSE", "README.md", "CHANGELOG.md" ]
   s.rdoc_options      = ["--charset=UTF-8"]
 
-  s.add_dependency "resque", "~> 1.0"
+  s.add_dependency "resque"
 
   s.add_development_dependency "minitest", "~> 5.0"
   s.add_development_dependency "rack-test", "~> 0.6.0"
