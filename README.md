@@ -3,6 +3,9 @@ ResqueCleaner
 
 [github.com/ono/resque-cleaner](https://github.com/ono/resque-cleaner)
 
+This project is not active.
+Please read [this](https://github.com/ono/resque-cleaner/issues/47) before you use the library.
+
 Description
 -----------
 
