@@ -15,6 +15,9 @@
         <span class="exception_filter">
           Exception: <%= exception_filter("filter_class","ex",@exceptions,@exception)%>
         </span>
+        <span class="queue_filter">
+          Queue: <%= queue_filter("filter_class","q",@queues,@queue)%>
+        </span>
         <span class="time_filter">
           From: <%= time_filter("filter_from","f",@from)%>
         </span>

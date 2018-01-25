@@ -35,6 +35,7 @@ describe "resque-web" do
     get "/cleaner"
     assert last_response.body.include?('BadJob')
     assert last_response.body =~ /\bException\b/
+    assert last_response.body =~ /\bQueue\b/
   end
 
   it "#cleaner_list should respond with success" do
@@ -44,6 +45,7 @@ describe "resque-web" do
 
   it '#cleaner_list shows the failed jobs' do
     get "/cleaner_list"
+    File.open(File.join(File.dirname(__FILE__),'..','tmp','response.html'), 'w') { |f| f.write last_response.body }
     assert last_response.body.include?('BadJob')
   end
 

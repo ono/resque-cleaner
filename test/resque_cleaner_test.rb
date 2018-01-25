@@ -177,6 +177,12 @@ describe "ResqueCleaner" do
     assert_equal 7, ret['SyntaxError']
   end
 
+  it "#stats_by_queue returns stats grouped by queue" do
+    ret = @cleaner.stats_by_queue
+    assert_equal 22, ret['jobs']
+    assert_equal 20, ret['jobs2']
+  end
+
   it "#lock ensures that a new failure job doesn't affect in a limit mode" do
     @cleaner.limiter.maximum = 23
     @cleaner.limiter.lock do

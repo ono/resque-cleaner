@@ -19,6 +19,15 @@
         locals: {q: 'ex', type: 'exception'}
       ) %>
 
+  <div class="title clearfix">
+    <h1>Group by queue</h1>
+  </div>
+
+  <%= erb(
+        File.read(ResqueCleaner::Server.erb_path("_stats.erb")),
+        locals: {q: 'q', type: 'queue'}
+      ) %>
+
   <% if @cleaner.limiter.on? %>
     <%= erb File.read(ResqueCleaner::Server.erb_path("_limiter.erb")) %>
   <% end %>
