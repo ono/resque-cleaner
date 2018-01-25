@@ -1,3 +1,7 @@
+## 0.4.1 (2018-01-25)
+
+* Remove Requeue version lock (#46)
+
 ## 0.4.0 (2017-11-20)
 
 * Render CSS as ERB partial to make Rails 5 compatible (#45)
