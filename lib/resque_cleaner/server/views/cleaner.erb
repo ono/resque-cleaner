@@ -1,6 +1,10 @@
 <%= erb File.read(ResqueCleaner::Server.erb_path("_cleaner_styles.erb")) %>
 
 <div class="cleaner">
+  <form method="post" id="clear_duplicates" action="cleaner_clear_duplicates">
+    <input type="submit" value="Clean duplicate jobs" />
+  </form>
+
   <div class="title clearfix">
     <h1>Group by class</h1>
   </div>

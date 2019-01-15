@@ -114,6 +114,28 @@ module Resque
         cleared
       end
 
+      # Clears duplicate jobs
+      def clear_duplicates
+        originals = Hash.new(0)
+        clear do |f|
+          hashed = "#{f['payload']['class'].to_s.length}#{f['payload']['class']}#{f['payload']['args'].to_s.length}#{f['payload']['args'].to_s}"
+          originals[hashed] += 1
+
+          # Do not remove anything first run through
+          false
+        end
+
+        clear do |f|
+          hashed = "#{f['payload']['class'].to_s.length}#{f['payload']['class']}#{f['payload']['args'].to_s.length}#{f['payload']['args'].to_s}"
+          originals[hashed] -= 1
+          if originals[hashed] > 0
+            true
+          else
+            false
+          end
+        end
+      end
+
       # Retries every jobs for which block evaluates to true.
       def requeue(clear_after_requeue=false, options={}, &block)
         requeued = 0

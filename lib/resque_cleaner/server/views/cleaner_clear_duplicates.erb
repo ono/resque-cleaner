@@ -1,0 +1,8 @@
+<%= erb File.read(ResqueCleaner::Server.erb_path("_cleaner_styles.erb")) %>
+
+<div class="cleaner">
+  <p class="message">Cleaned <%= @count %> jobs.</p>
+  <p class="back_to_list">
+    <a href="cleaner_list">Back to List</a>
+  </p>
+</div>
