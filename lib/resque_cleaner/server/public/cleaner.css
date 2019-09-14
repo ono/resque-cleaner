@@ -1,3 +1,7 @@
+#main .cleaner .title {
+  display: flex;
+  flex-direction: column;
+}
 
 #main .cleaner .title h1 { float: left }
 

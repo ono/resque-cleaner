@@ -3,6 +3,11 @@
 <div class="cleaner">
   <div class="title clearfix">
     <h1>Group by class</h1>
+    <div>
+      <% @cleaner.team_mapping.each do |team, classes| %>
+        <button onclick='highlightClasses(<%= classes.split %>)'><%= team.camelize %></button>
+      <% end %>
+    </div>
   </div>
 
   <%= erb(
@@ -23,3 +28,12 @@
     <%= erb File.read(ResqueCleaner::Server.erb_path("_limiter.erb")) %>
   <% end %>
 </div>
+
+<script>
+    function highlightClasses(classes) {
+        $('tr').css('background', 'white');
+        $.each(classes, function(_, className) {
+            $('tr:contains(' + className + ')').css('background', 'yellow');
+        })
+    }
+</script>
