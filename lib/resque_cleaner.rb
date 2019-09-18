@@ -18,11 +18,25 @@ module Resque
       # Set false if you don't show any message.
       attr_accessor :print_message
 
+      @@team_mapping ||= {}
+
+      class << self
+        def team_mapping
+          @@team_mapping
+        end
+
+        def team_mapping=(v)
+          @@team_mapping = v
+        end
+      end
+
+      attr_accessor :team_mapping
       # Initializes instance
       def initialize
         @failure = Resque::Failure.backend
         @print_message = true
         @limiter = Limiter.new self
+        @team_mapping = @@team_mapping
       end
 
       # Returns redis instance.
