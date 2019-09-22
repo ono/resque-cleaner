@@ -5,7 +5,7 @@
     <h1>Group by class</h1>
     <div>
       <% @cleaner.team_mapping.each do |team, classes| %>
-        <button onclick='highlightClasses(<%= classes.split %>)'><%= team.camelize %></button>
+        <button onclick='highlightClasses(<%= classes.split %>)'><%= team.capitalize %></button>
       <% end %>
     </div>
   </div>
