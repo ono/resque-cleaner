@@ -33,7 +33,7 @@
     function highlightClasses(classes) {
         $('tr').css('background', 'white');
         $.each(classes, function(_, className) {
-            $("a[href='cleaner_one?c=" + className + "'").parent().parent().css('background', 'yellow');
+            $("a[href='cleaner_one?c=" + className + "'").parents('tr').css('background', 'yellow');
         })
     }
 </script>
