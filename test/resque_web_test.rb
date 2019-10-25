@@ -52,12 +52,17 @@ describe "resque-web" do
     assert last_response.body.include?('"BadJobWithSyntaxError"')
     assert last_response.body.include?('"BadJob"')
   end
-
-
+  
+  it "#cleaner_list shows escaped XSS attempt" do
+    get "/cleaner_list?t=%22%3e%3cscript%3ealert(document.cookie)%3c%2fscript%3e"
+    assert last_response.body.include?('&quot;&gt;&lt;script&gt;alert(document.cookie)&lt;&#x2F;script&gt;')
+  end
+  
   it '#cleaner_exec clears job' do
     post "/cleaner_exec", :action => "clear", :sha1 => Digest::SHA1.hexdigest(@cleaner.select[0].to_json)
     assert_equal 10, @cleaner.select.size
   end
+  
   it "#cleaner_dump should respond with success" do
     get "/cleaner_dump"
     assert last_response.ok?, last_response.errors
