@@ -33,11 +33,11 @@
     <div class="clearfix">
       <div class="control_panel sub_header">
         <form method="post" id="exec" action="cleaner_exec">
-          <input type="hidden" name="c" value="<%=@klass%>" />
-          <input type="hidden" name="f" value="<%=@from%>" />
-          <input type="hidden" name="t" value="<%=@to%>" />
-          <input type="hidden" name="p" value="<%=@paginate.page%>" />
-          <input type="hidden" name="ex" value="<%=@exception%>" />
+          <input type="hidden" name="c" value="<%= h @klass %>" />
+          <input type="hidden" name="f" value="<%= h @from %>" />
+          <input type="hidden" name="t" value="<%= h @to %>" />
+          <input type="hidden" name="p" value="<%= h @paginate.page %>" />
+          <input type="hidden" name="ex" value="<%= h @exception %>" />
           <input type="hidden" name="regex" value="<%=Rack::Utils.escape_html(@regex)%>" />
           <select id="form_action" name="action">
             <option id="default_option" value="" selected="selected">-- Select Action --</option>
