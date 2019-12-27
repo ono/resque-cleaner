@@ -10,6 +10,9 @@ require 'minitest/spec'
 require 'minitest/autorun'
 require 'resque'
 require 'timecop'
+require 'active_job'
+
+ActiveJob::Base.logger = ActiveSupport::Logger.new(IO::NULL)
 
 begin
   require 'leftright'
@@ -99,6 +102,13 @@ class BadJobWithSyntaxError
   end
 end
 
+class BadJobWithSyntaxErrorActive < ActiveJob::Base
+  self.queue_adapter = :resque
+  def perform
+    raise SyntaxError, "Extra Bad job!"
+  end
+end
+
 #
 # helper methods
 #
@@ -106,7 +116,11 @@ end
 def create_and_process_jobs(queue,worker,num,date,job,*args)
   Timecop.freeze(date) do
     num.times do
-      Resque::Job.create(queue, job, *args)
+      if job.ancestors.include?(ActiveJob::Base)
+        job.set(queue: queue).perform_later(*args)
+      else
+        Resque::Job.create(queue, job, *args)
+      end
     end
     worker.work(0)
   end

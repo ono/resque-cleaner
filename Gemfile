@@ -7,4 +7,5 @@ group :test do
   gem 'json'
   gem 'timecop'
   gem 'rack-test'
+  gem 'activejob', '5.2.3'
 end
