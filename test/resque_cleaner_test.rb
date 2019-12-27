@@ -122,7 +122,7 @@ describe "ResqueCleaner" do
     assert_equal 22, ret.size
 
     # filter by class
-    ret = @cleaner.select {|j| j.klass?(BadJobWithSyntaxError)}
+    ret = @cleaner.select {|j| j.klass?(BadJobWithSyntaxErrorActive)}
     assert_equal 7, ret.size
 
     # filter by exception
@@ -162,7 +162,7 @@ describe "ResqueCleaner" do
   it "#stats_by_class returns stats grouped by class" do
     ret = @cleaner.stats_by_class
     assert_equal 35, ret['BadJob']
-    assert_equal 7, ret['BadJobWithSyntaxError']
+    assert_equal 7, ret['BadJobWithSyntaxErrorActive']
   end
 
   it "#stats_by_class works with broken log" do

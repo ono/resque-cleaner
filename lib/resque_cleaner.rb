@@ -52,7 +52,7 @@ module Resque
       def stats_by_class(&block)
         jobs, stats = select(&block), {}
         jobs.each do |job|
-          klass = job["payload"] && job["payload"]["class"] ? job["payload"]["class"] : "UNKNOWN"
+          klass = job.klass
           stats[klass] ||= 0
           stats[klass] += 1
         end
@@ -178,13 +178,18 @@ module Resque
           Time.parse(self['failed_at']) >= time
         end
 
+        # Returns true job name - incl wrapped ActiveJobs
+        def klass
+          payload_klass = self.dig("payload", "class")
+          if payload_klass == "ActiveJob::QueueAdapters::ResqueAdapter::JobWrapper"
+            payload_klass = self.dig("payload", "args").first.try :[], "job_class"
+          end
+          payload_klass || 'UNKNOWN'
+        end
+
         # Returns true if the class of the job matches. Otherwise returns false.
         def klass?(klass_or_name)
-          if self["payload"] && self["payload"]["class"]
-            self["payload"]["class"] == klass_or_name.to_s
-          else
-            klass_or_name=="UNKNOWN"
-          end
+          self.klass == klass_or_name.to_s
         end
 
         # Returns true if the exception raised by the failed job matches. Otherwise returns false.
