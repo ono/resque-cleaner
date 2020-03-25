@@ -1,7 +1,7 @@
 <table class="class_list">
   <tr>
     <th><%= type.gsub('klass','class').capitalize %></th>
-    <th>Failed</th>
+    <th onclick='sortList()' style="cursor: pointer;">Failed</th>
     <th>In last 1 hour</th>
     <th>In last 3 hours</th>
     <th>In last 24 hours</th>
@@ -43,3 +43,24 @@
     <td class="number"><a href="cleaner_list?f=168"><%= @total[:d7] %></a></td>
   </tr>
 </table>
+
+<script>
+    function sortList() {
+        if (window.resque_dir_asc === undefined) {
+            window.resque_dir_asc = true;
+        }
+        window.resque_dir_asc = !window.resque_dir_asc;
+
+        var tbody = $('table:first').find('tbody');
+        tbody.find('tr:not(:first)').detach().sort(function(a, b) {
+            var aKey = parseInt($(a).find('td:nth-child(2)').text());
+            var bKey = parseInt($(b).find('td:nth-child(2)').text());
+
+            if (window.resque_dir_asc) {
+              return aKey > bKey ? 1 : -1;
+            } else {
+              return aKey <= bKey ? 1 : -1;
+            }
+        }).appendTo(tbody);
+    }
+</script>
