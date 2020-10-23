@@ -129,3 +129,32 @@ def add_empty_payload_failure
   data = Resque.encode(data)
   Resque.redis.rpush(:failed, data)
 end
+
+def add_activejob_failure
+  data = {
+    :failed_at => Time.now.strftime("%Y/%m/%d %H:%M:%S %Z"),
+    :payload   => {
+      :class => "ActiveJob::QueueAdapters::ResqueAdapter::JobWrapper",
+      :args  => [
+        :job_class => "ActiveJobGoodJob",
+        :job_id    => "0bc036ab-32c0-4ad0-9138-abdfb06658c4",
+        :provider_job_id => nil,
+        :queue_name => "download_scrape_job",
+        :priority => nil,
+        :arguments => [:good_job],
+        :executions => 0,
+        :exception_executions => {},
+        :locale => "en",
+        :timezone => "UTC",
+        :enqueued_at => "2020-10-13T16:37:18Z"
+      ]
+    },
+    :exception => "Resque::DirtyExit",
+    :error     => "Resque::DirtyExit",
+    :backtrace => [],
+    :worker    => "worker",
+    :queue     => "queue"
+  }
+  data = Resque.encode(data)
+  Resque.redis.rpush(:failed, data)
+end

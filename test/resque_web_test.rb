@@ -42,6 +42,13 @@ describe "resque-web" do
     assert last_response.ok?, last_response.errors
   end
 
+  it '#cleaner_list shows ActiveJob failed jobs properly formated' do
+    add_activejob_failure
+
+    get "/cleaner_list", :c => "ActiveJobGoodJob"
+    assert last_response.body.include?("ActiveJobGoodJob")
+  end
+
   it '#cleaner_list shows the failed jobs' do
     get "/cleaner_list"
     assert last_response.body.include?('BadJob')
