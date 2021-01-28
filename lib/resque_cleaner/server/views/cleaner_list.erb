@@ -75,7 +75,7 @@
             <dd>Job <%= index%> could not be parsed; perhaps it contains invalid JSON?</dd>
             <% else %>
             <dt>
-              <input type="checkbox" id="<%=Digest::SHA1.hexdigest job.to_json %>" />
+              <input type="checkbox" id="<%=Digest::SHA1.hexdigest job.inspect %>" />
             </dt>
             <dd>&nbsp;</dd>
             <dt>Worker</dt>

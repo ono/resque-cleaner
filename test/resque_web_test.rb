@@ -75,7 +75,7 @@ describe "resque-web" do
   end
 
   it '#cleaner_exec clears job' do
-    post "/cleaner_exec", :action => "clear", :sha1 => Digest::SHA1.hexdigest(@cleaner.select[0].to_json)
+    post "/cleaner_exec", :action => "clear", :sha1 => Digest::SHA1.hexdigest(@cleaner.select[0].inspect)
     assert_equal 10, @cleaner.select.size
   end
 

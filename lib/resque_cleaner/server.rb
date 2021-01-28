@@ -104,6 +104,10 @@ module ResqueCleaner
             Array(args).map { |a| a.inspect }.join("\n")
           end
 
+          def fix_all_job_args(jobs)
+            jobs.map { |job| job['payload']['args'] = job['payload']['args'].map { |arg| arg = show_job_args(arg); arg }; job}
+          end
+
           def text_filter(id, name, value)
             html = "<input id=\"#{id}\"  type=\"text\" name=\"#{name}\" value=\"#{value}\">"
             html += "</input>"
@@ -210,7 +214,9 @@ module ResqueCleaner
           block = filter_block
 
           content_type :json
-          JSON.pretty_generate(cleaner.select(&block))
+          selected = cleaner.select(&block)
+          selected = fix_all_job_args(selected)
+          JSON.pretty_generate(selected)
         end
 
         post "/cleaner_stale" do
@@ -268,7 +274,7 @@ module ResqueCleaner
         (!@to || j.before?(hours_ago(@to))) &&
         (!@klass || j.klass?(@klass)) &&
         (!@exception || j.exception?(@exception)) &&
-        (!@sha1 || @sha1[Digest::SHA1.hexdigest(j.to_json)]) &&
+        (!@sha1 || @sha1[Digest::SHA1.hexdigest(j.inspect)]) &&
         (!@regex || j.to_s =~ /#{@regex}/)
       }
     end
