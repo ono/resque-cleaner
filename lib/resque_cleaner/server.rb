@@ -230,13 +230,13 @@ module ResqueCleaner
     end
 
     def build_urls
-      params = {
+      params = URI.encode_www_form({
         c: @klass,
         ex: @exception,
         f: @from,
         t: @to,
         regex: @regex
-      }.map {|key,value| "#{key}=#{URI.encode(value.to_s)}"}.join("&")
+      })
 
       @list_url = "cleaner_list?#{params}"
       @dump_url = "cleaner_dump?#{params}"
