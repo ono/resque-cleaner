@@ -230,7 +230,7 @@ module ResqueCleaner
         f: @from,
         t: @to,
         regex: @regex
-      }.map {|key,value| "#{key}=#{URI.encode(value.to_s)}"}.join("&")
+      }.map {|key,value| "#{key}=#{CGI.escape(value.to_s)}"}.join("&")
 
       @list_url = "cleaner_list?#{params}"
       @dump_url = "cleaner_dump?#{params}"
