@@ -10,7 +10,7 @@
   </tr>
   <% @stats[type.to_sym].each do |field,count| %>
     <tr>
-      <% filter = "#{q}=#{URI.encode(field)}" %>
+      <% filter = "#{q}=#{CGI.escape(field)}" %>
       <td><%= field %></td>
       <td class="number">
         <a href="cleaner_list?<%=filter%>"><%= count[:total] %></a>
