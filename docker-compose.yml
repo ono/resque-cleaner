@@ -1,0 +1,10 @@
+version: '3'
+
+services:
+  console:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: resque-cleaner-console
+    volumes:
+      - ".:/app"
