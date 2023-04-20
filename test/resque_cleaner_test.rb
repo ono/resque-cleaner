@@ -2,7 +2,7 @@ require File.expand_path(File.dirname(__FILE__) + '/test_helper')
 require 'time'
 describe "ResqueCleaner" do
   before do
-    Resque.redis.flushall
+    Resque.redis.redis.flushall
 
     @worker = Resque::Worker.new(:jobs,:jobs2)
 
@@ -155,7 +155,7 @@ describe "ResqueCleaner" do
     # with block
     ret = @cleaner.stats_by_date{|j| j['payload']['args']==['Jason']}
     assert_equal 2, ret['2009/03/13']
-    assert_equal nil, ret['2009/11/13']
+    assert_nil ret['2009/11/13']
     assert_equal 11, ret['2010/08/13']
   end
 
