@@ -1,3 +1,5 @@
 .DS_Store
 local_note.md
 Gemfile.lock
+test/stdout
+test/dump.rdb
