@@ -12,7 +12,7 @@ class Minitest::Spec
 end
 
 def setup_some_failed_jobs
-  Resque.redis.flushall
+  Resque.redis.del(Resque.redis.keys('*'))
 
   @worker = Resque::Worker.new(:jobs,:jobs2)
 
@@ -63,4 +63,3 @@ describe "resque-web" do
     assert last_response.ok?, last_response.errors
   end
 end
-
