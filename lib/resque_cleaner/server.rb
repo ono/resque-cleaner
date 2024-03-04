@@ -4,6 +4,7 @@ require 'yaml'
 # Structure has been borrowed from ResqueScheduler.
 module ResqueCleaner
   module Server
+    SENTRY_BASE_URL = "https://fullscript.sentry.io/issues/?utc=true"
 
     def self.erb_path(filename)
       File.join(File.dirname(__FILE__), 'server', 'views', filename)
@@ -234,6 +235,30 @@ module ResqueCleaner
 
       @list_url = "cleaner_list?#{params}"
       @dump_url = "cleaner_dump?#{params}"
+      build_sentry_url
+    end
+
+    def build_sentry_url
+      filter = {
+        transaction: @klass.present? ? @klass : "*Job" 
+      }
+      if @exception.present?
+        filter["error.type"] = @exception
+      end
+      filter = filter.map {|key,value| "#{key}:#{value.to_s}"}.join(" ")
+      params = {
+        environment: Rails.env,
+        query: filter 
+      }
+      if @from.present? || @to.present?
+        params["start"] = (@from.present? ? hours_ago(@from) : 28.days.ago).utc.iso8601
+        params["end"] = (@to.present? ? hours_ago(@to) : DateTime.now).utc.iso8601
+      end
+      params = params.map {|key,value| "#{key}=#{URI.encode_www_form_component(value.to_s)}"}.join("&")
+
+      @sentry_url = "#{SENTRY_BASE_URL}&#{params}"
+    rescue => error
+      # Skip displaying the sentry link upon unexpected filter format, but keep event list displayed 
     end
 
     def filter_block

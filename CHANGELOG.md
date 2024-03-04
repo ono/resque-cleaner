@@ -1,3 +1,7 @@
+## 0.5.0 (2024-03-04)
+
+* Add link to Sentry issues in the event list view based on the current filters (other than regex)
+
 ## 0.4.1 (2018-01-25)
 
 * Remove Requeue version lock (#46)

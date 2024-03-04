@@ -47,6 +47,11 @@
     <% end %>
 
   </ul>
+    <% if @sentry_url %>
+      <div class="sentry">
+          <a href="<%= @sentry_url%>" target="_blank">Sentry</a>
+      </div>
+    <% end %>
     <div class="dump">
         <a href="<%= @dump_url%>" target="_blank">Dump</a>
     </div>
