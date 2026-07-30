@@ -1,4 +1,6 @@
 require 'yaml'
+require 'digest/sha1'
+require 'json'
 
 # Extends Resque Web Based UI.
 # Structure has been borrowed from ResqueScheduler.
@@ -112,7 +114,6 @@ module ResqueCleaner
         mime_type :json, 'application/json'
 
         get "/cleaner" do
-          load_library
           load_cleaner_filter
 
           @jobs = cleaner.select
@@ -143,7 +144,6 @@ module ResqueCleaner
         end
 
         get "/cleaner_list" do
-          load_library
           load_cleaner_filter
           build_urls
 
@@ -161,7 +161,6 @@ module ResqueCleaner
         end
 
         post "/cleaner_exec" do
-          load_library
           load_cleaner_filter
           build_urls
 
@@ -183,7 +182,6 @@ module ResqueCleaner
         end
 
         get "/cleaner_dump" do
-          load_library
           load_cleaner_filter
 
           block = filter_block
@@ -193,7 +191,6 @@ module ResqueCleaner
         end
 
         post "/cleaner_stale" do
-          load_library
           cleaner.clear_stale
           redirect url_path(:cleaner)
         end
@@ -205,15 +202,6 @@ module ResqueCleaner
       @cleaner ||= Resque::Plugins::ResqueCleaner.new
       @cleaner.print_message = false
       @cleaner
-    end
-
-    def load_library
-      require 'digest/sha1'
-      begin
-        require 'yajl/json_gem' unless [].respond_to?(:to_json)
-      rescue Exception
-        require 'json'
-      end
     end
 
     def load_cleaner_filter
