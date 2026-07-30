@@ -112,6 +112,31 @@ describe "resque-web" do
     assert_includes last_response.body, "ActiveJob::QueueAdapters::ResqueAdapter::JobWrapper"
   end
 
+  it "escapes persisted failure values" do
+    Resque.redis.rpush(:failed, Resque.encode(
+      :failed_at  => Time.now.strftime("%Y/%m/%d %H:%M:%S %Z"),
+      :payload    => { :class => %q{"><script>alert(1)</script>}, :args => [] },
+      :exception  => %q{"><script>alert(2)</script>},
+      :error      => "error",
+      :backtrace  => [],
+      :worker     => %q{worker"><script>alert(3)</script>:123:queue},
+      :queue      => %q{"><script>alert(4)</script>},
+      :retried_at => %q{"><script>alert(5)</script>}
+    ))
+
+    get "/cleaner"
+    (1..2).each do |number|
+      assert_includes last_response.body, "&quot;&gt;&lt;script&gt;alert(#{number})&lt;"
+      refute_includes last_response.body, "<script>alert(#{number})"
+    end
+
+    get "/cleaner_list"
+    (1..5).each do |number|
+      assert_includes last_response.body, "&quot;&gt;&lt;script&gt;alert(#{number})&lt;"
+      refute_includes last_response.body, "<script>alert(#{number})"
+    end
+  end
+
   it '#cleaner_exec clears job' do
     post "/cleaner_exec", :action => "clear", :sha1 => Digest::SHA1.hexdigest(@cleaner.select[0].to_json)
     assert_equal 10, @cleaner.select.size

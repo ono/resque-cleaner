@@ -81,19 +81,19 @@
             <dd>&nbsp;</dd>
             <dt>Worker</dt>
             <dd>
-              <a href="<%= u(:workers, job['worker']) %>"><%= job['worker'].split(':')[0...2].join(':') %></a> on <b class='queue-tag'><%= job['queue'] %></b > at <b><span class="time"><%= Time.parse(job['failed_at']).strftime(date_format) %></span></b>
+              <a href="<%=h u(:workers, job['worker']) %>"><%=h job['worker'].split(':')[0...2].join(':') %></a> on <b class='queue-tag'><%=h job['queue'] %></b > at <b><span class="time"><%= Time.parse(job['failed_at']).strftime(date_format) %></span></b>
               <% if job['retried_at'] %>
                 <div class='retried'>
-                  Retried <b><span class="time"><%= job['retried_at'] %></span></b>
+                  Retried <b><span class="time"><%=h job['retried_at'] %></span></b>
                 </div>
               <% end %>
             </dd>
             <dt>Class</dt>
-            <dd><code><%= job['payload'] ? job.display_class : 'nil' %></code></dd>
+            <dd><code><%=h job['payload'] ? job.display_class : 'nil' %></code></dd>
             <dt>Arguments</dt>
             <dd><pre><%=h job['payload'] ? show_job_args(job.display_args) : 'nil' %></pre></dd>
             <dt>Exception</dt>
-            <dd><code><%= job['exception'] %></code></dd>
+            <dd><code><%=h job['exception'] %></code></dd>
             <dt>Error</dt>
             <dd class='error'>
               <% if job['backtrace'] %>
