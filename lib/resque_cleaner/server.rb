@@ -82,7 +82,8 @@ module ResqueCleaner
             html += "<option value=\"\">-</option>"
             klasses.each do |k|
               selected = k == value ? 'selected="selected"' : ''
-              html += "<option #{selected} value=\"#{k}\">#{k}</option>"
+              escaped = Rack::Utils.escape_html(k.to_s)
+              html += "<option #{selected} value=\"#{escaped}\">#{escaped}</option>"
             end
             html += "</select>"
           end
@@ -92,7 +93,8 @@ module ResqueCleaner
             html += "<option value=\"\">-</option>"
             exceptions.each do |ex|
               selected = ex == value ? 'selected="selected"' : ''
-              html += "<option #{selected} value=\"#{ex}\">#{ex}</option>"
+              escaped = Rack::Utils.escape_html(ex.to_s)
+              html += "<option #{selected} value=\"#{escaped}\">#{escaped}</option>"
             end
             html += "</select>"
           end
