@@ -1,4 +1,5 @@
 require 'time'
+require 'securerandom'
 require 'resque'
 require 'resque/server'
 
@@ -103,10 +104,7 @@ module Resque
           @limiter.jobs.each_with_index do |job,i|
             if !block_given? || block.call(job)
               index = @limiter.start_index + i - cleared
-              # fetches again since you can't ensure that it is always true:
-              # a == endode(decode(a))
-              value = redis.lindex(:failed, index)
-              redis.lrem(:failed, 1, value)
+              remove_failure_at(index)
               cleared += 1
             end
           end
@@ -123,19 +121,13 @@ module Resque
             if !block_given? || block.call(job)
               index = @limiter.start_index + i - requeued
 
-              value = redis.lindex(:failed, index)
-              redis.multi do
-                Job.create(queue||job['queue'], job['payload']['class'], *job['payload']['args'])
+              Job.create(queue||job['queue'], job['payload']['class'], *job['payload']['args'])
 
-                if clear_after_requeue
-                  # remove job
-                  # TODO: should use ltrim. not sure why i used lrem here...
-                  redis.lrem(:failed, 1, value)
-                else
-                  # mark retried
-                  job['retried_at'] = Time.now.strftime("%Y/%m/%d %H:%M:%S")
-                  redis.lset(:failed, @limiter.start_index+i, Resque.encode(job))
-                end
+              if clear_after_requeue
+                remove_failure_at(index)
+              else
+                job['retried_at'] = Time.now.strftime("%Y/%m/%d %H:%M:%S")
+                redis.lset(:failed, @limiter.start_index+i, Resque.encode(job))
               end
 
               requeued += 1
@@ -332,6 +324,16 @@ module Resque
 
       def too_many_message
         "There are too many failed jobs(count=#{@failure.count}). This only looks at last #{@limiter.maximum} jobs."
+      end
+
+      private
+
+      def remove_failure_at(index)
+        sentinel = SecureRandom.uuid
+        redis.multi do |transaction|
+          transaction.lset(:failed, index, sentinel)
+          transaction.lrem(:failed, 1, sentinel)
+        end
       end
     end
   end
