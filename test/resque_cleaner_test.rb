@@ -74,6 +74,19 @@ describe "ResqueCleaner" do
     assert_equal 0, @cleaner.select{|job| job["payload"]["args"][0]=="Jason"}.size
   end
 
+  it "#clear removes the selected byte-identical failure" do
+    encoded = Resque.redis.lindex(:failed, 0)
+    marker_data = Resque.decode(encoded)
+    marker_data["exception"] = "DistinctFailure"
+    marker = Resque.encode(marker_data)
+    Resque.redis.redis.flushall
+    [encoded, marker, encoded].each { |value| Resque.redis.rpush(:failed, value) }
+    @cleaner.limiter.maximum = 1
+
+    assert_equal 1, @cleaner.clear
+    assert_equal [encoded, marker], Resque.redis.lrange(:failed, 0, -1)
+  end
+
   it "#requeue retries failure jobs" do
     assert_equal 0, queue_size(:jobs,:jobs2)
     requeued = @cleaner.requeue
@@ -94,6 +107,20 @@ describe "ResqueCleaner" do
     assert_equal 42, requeued
     assert_equal 42, queue_size(:jobs,:jobs2)
     assert_equal 0, @cleaner.select.size
+  end
+
+  it "#requeue with clear removes the selected byte-identical failure" do
+    encoded = Resque.redis.lindex(:failed, 0)
+    marker_data = Resque.decode(encoded)
+    marker_data["exception"] = "DistinctFailure"
+    marker = Resque.encode(marker_data)
+    Resque.redis.redis.flushall
+    [encoded, marker, encoded].each { |value| Resque.redis.rpush(:failed, value) }
+    @cleaner.limiter.maximum = 1
+
+    assert_equal 1, @cleaner.requeue(true)
+    assert_equal [encoded, marker], Resque.redis.lrange(:failed, 0, -1)
+    assert_equal "BadJob", Resque.peek(:jobs, 0)["class"]
   end
 
   it "#requeue with :queue option requeues the jobs to the queue" do
