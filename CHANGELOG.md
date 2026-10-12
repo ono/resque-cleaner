@@ -1,3 +1,14 @@
+## 0.5.0 (2026-10-12)
+
+* Ruby 3+ support: fix rendering the Cleaner page (#53)
+* Display ActiveJob failures by their inner job class, without modifying the stored payload (#50, #59)
+* Remove failed jobs by list index, so byte-identical failures can't cause the wrong one to be removed (#60)
+* Security: escape filter params and failure metadata (job class, exception, worker, queue, `retried_at`) in the web UI (#48, #61)
+* Bound regex filter matching with a timeout and return 400 for invalid or runaway patterns (#63)
+* Require server dependencies at load time and drop the `yajl` fallback (#62)
+* Require Ruby 3.2+ and Resque 2.0+
+* Replace Travis with GitHub Actions; add a Docker dev environment (#58)
+
 ## 0.4.1 (2018-01-25)
 
 * Remove Requeue version lock (#46)

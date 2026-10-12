@@ -3,13 +3,13 @@ ResqueCleaner
 
 [github.com/ono/resque-cleaner](https://github.com/ono/resque-cleaner)
 
-This project is not active.
+This project is currently in maintenance mode.
 Please read [this](https://github.com/ono/resque-cleaner/issues/47) before you use the library.
 
 Description
 -----------
 
-ResqueCleaner is a [Resque](https://github.com/defunkt/resque) plugin which
+ResqueCleaner is a [Resque](https://github.com/resque/resque) plugin which
 aims to help you to clean up failed jobs on Resque by:
 
 * Showing stats of failed jobs
@@ -24,6 +24,8 @@ Installation
 Install as a gem:
 
     $ gem install resque-cleaner
+
+Requires Ruby 3.2+ and Resque 2.0+.
 
 
 Resque-Web integration
