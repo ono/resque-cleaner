@@ -160,6 +160,7 @@ module ResqueCleaner
         end
 
         post "/cleaner_exec" do
+          halt 403 if cross_site_request?
           load_cleaner_filter
           build_urls
 
@@ -190,6 +191,7 @@ module ResqueCleaner
         end
 
         post "/cleaner_stale" do
+          halt 403 if cross_site_request?
           cleaner.clear_stale
           redirect url_path(:cleaner)
         end
@@ -201,6 +203,14 @@ module ResqueCleaner
       @cleaner ||= Resque::Plugins::ResqueCleaner.new
       @cleaner.print_message = false
       @cleaner
+    end
+
+    def cross_site_request?
+      fetch_site = request.env["HTTP_SEC_FETCH_SITE"]
+      return !%w[same-origin none].include?(fetch_site) if fetch_site
+
+      origin = request.env["HTTP_ORIGIN"]
+      origin && origin.sub(%r{\A[a-z][a-z0-9+.-]*://}i, "") != request.host_with_port
     end
 
     def load_cleaner_filter

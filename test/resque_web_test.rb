@@ -157,6 +157,34 @@ describe "resque-web" do
     assert_equal 10, @cleaner.select.size
   end
 
+  it "rejects cross-site POSTs" do
+    [
+      { "HTTP_SEC_FETCH_SITE" => "cross-site" },
+      { "HTTP_SEC_FETCH_SITE" => "same-site" },
+      { "HTTP_ORIGIN" => "http://evil.test" },
+      { "HTTP_ORIGIN" => "null" },
+    ].each do |env|
+      post "/cleaner_exec", { :action => "clear", :select_all_pages => "1" }, env
+      assert_equal 403, last_response.status
+      post "/cleaner_stale", {}, env
+      assert_equal 403, last_response.status
+    end
+    assert_equal 11, @cleaner.select.size
+  end
+
+  it "allows same-origin and non-browser POSTs" do
+    [
+      { "HTTP_SEC_FETCH_SITE" => "same-origin" },
+      { "HTTP_ORIGIN" => "https://example.org" },
+      {},
+    ].each do |env|
+      setup_some_failed_jobs
+      post "/cleaner_exec", { :action => "clear", :select_all_pages => "1" }, env
+      assert last_response.ok?, last_response.errors
+      assert_equal 0, @cleaner.select.size
+    end
+  end
+
   it "#cleaner_dump should respond with success" do
     get "/cleaner_dump"
     assert last_response.ok?, last_response.errors
