@@ -325,6 +325,13 @@ application; it should be quick even if there are huge number of failed jobs.
     => false
 ```
 
+Development
+-----------
+
+Run the test suite in Docker:
+
+    $ docker compose run --rm console bundle exec rake
+
 Many Thanks!
 ------------
 

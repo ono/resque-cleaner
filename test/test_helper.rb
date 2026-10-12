@@ -35,7 +35,7 @@ end
 # start our own redis when the tests start,
 # kill it when they end
 #
-MiniTest.after_run {
+Minitest.after_run {
   if Process.pid == $TEST_PID
     processes = `ps -A -o pid,command | grep [r]edis-test`.split($/)
     pids = processes.map { |process| process.split(" ")[0] }
