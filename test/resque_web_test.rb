@@ -78,6 +78,21 @@ describe "resque-web" do
     assert last_response.body.include?('"BadJob"')
   end
 
+  it "#cleaner_list rejects invalid and runaway regex filters" do
+    get "/cleaner_list", :regex => "("
+    assert_equal 400, last_response.status
+
+    Resque.redis.rpush(:failed, Resque.encode(
+      :failed_at => Time.now.strftime("%Y/%m/%d %H:%M:%S %Z"),
+      :payload   => { :class => "a" * 40 + "!", :args => [] },
+      :exception => "RuntimeError",
+      :worker    => "worker",
+      :queue     => "jobs"
+    ))
+    get "/cleaner_list", :regex => '(a+)+\1![a-z]'
+    assert_equal 400, last_response.status
+  end
+
   it "#cleaner_list shows escaped XSS attempt" do
     get "/cleaner_list?t=%22%3e%3cscript%3ealert(document.cookie)%3c%2fscript%3e"
     assert last_response.body.include?('&quot;&gt;&lt;script&gt;alert(document.cookie)&lt;')

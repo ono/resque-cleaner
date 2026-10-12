@@ -210,6 +210,9 @@ module ResqueCleaner
       @klass = params[:c]=="" ? nil : params[:c]
       @exception = params[:ex]=="" ? nil : params[:ex]
       @regex = params[:regex]=="" ? nil : params[:regex]
+      @regexp = Regexp.new(@regex, timeout: 1) if @regex
+    rescue RegexpError
+      halt 400, "Invalid regex"
     end
 
     def build_urls
@@ -232,8 +235,14 @@ module ResqueCleaner
         (!@klass || j.klass?(@klass)) &&
         (!@exception || j.exception?(@exception)) &&
         (!@sha1 || @sha1[Digest::SHA1.hexdigest(j.to_json)]) &&
-        (!@regex || j.to_s =~ /#{@regex}/)
+        (!@regexp || regex_match?(j))
       }
+    end
+
+    def regex_match?(job)
+      @regexp.match?(job.to_s)
+    rescue Regexp::TimeoutError
+      halt 400, "Regex took too long"
     end
 
     def hours_ago(h)
