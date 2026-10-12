@@ -82,6 +82,97 @@ describe "ResqueCleaner" do
     assert_equal 42, queue_size(:jobs,:jobs2)
   end
 
+  it "#requeue preserves stored ActiveJob payloads and enqueues the wrapper" do
+    Resque.redis.redis.flushall
+    original = activejob_failure_data
+    add_activejob_failure
+
+    assert_equal 1, @cleaner.requeue(false)
+
+    stored = Resque.decode(Resque.redis.lindex(:failed, 0))
+    retried_at = stored.delete("retried_at")
+    assert_match(/\A\d{4}\/\d{2}\/\d{2} \d{2}:\d{2}:\d{2}\z/, retried_at)
+    assert_equal Resque.decode(Resque.encode(original)), stored
+
+    queued = Resque.peek(:queue, 0)
+    assert_equal "ActiveJob::QueueAdapters::ResqueAdapter::JobWrapper", queued["class"]
+    assert_equal Resque.decode(Resque.encode(original[:payload][:args])), queued["args"]
+  end
+
+  it "#requeue retries the same ActiveJob failure repeatedly without corruption" do
+    Resque.redis.redis.flushall
+    add_activejob_failure
+
+    2.times { assert_equal 1, @cleaner.requeue(false) }
+
+    first = Resque.peek(:queue, 0)
+    second = Resque.peek(:queue, 1)
+    assert_equal first, second
+    assert_equal "ActiveJob::QueueAdapters::ResqueAdapter::JobWrapper", second["class"]
+    assert_equal "ActiveJob::QueueAdapters::ResqueAdapter::JobWrapper",
+      Resque.decode(Resque.redis.lindex(:failed, 0)).dig("payload", "class")
+  end
+
+  it "#requeue leaves a plain Resque payload unchanged" do
+    Resque.redis.redis.flushall
+    create_and_process_jobs :jobs, @worker, 1, Time.now, BadJob, "plain"
+    original = Resque.decode(Resque.redis.lindex(:failed, 0))
+
+    assert_equal 1, @cleaner.requeue(false)
+
+    stored = Resque.decode(Resque.redis.lindex(:failed, 0))
+    assert_equal original["payload"], stored["payload"]
+  end
+
+  it "#clear removes ActiveJob failures" do
+    Resque.redis.redis.flushall
+    add_activejob_failure
+
+    assert_equal 1, @cleaner.clear
+    assert_equal 0, @cleaner.failure.count
+  end
+
+  it "display helpers tolerate malformed ActiveJob wrapper arguments" do
+    wrapper = "ActiveJob::QueueAdapters::ResqueAdapter::JobWrapper"
+    malformed_args = [
+      [nil, nil],
+      ["invalid", "invalid"],
+      [[123], [123]],
+      [[{}], [{}]],
+      [[{"arguments" => ["raw"]}], ["raw"]]
+    ]
+
+    malformed_args.each do |args, expected_display_args|
+      job = {"payload" => {"class" => wrapper, "args" => args}}
+      job.extend Resque::Plugins::ResqueCleaner::FailedJobEx
+
+      assert_equal wrapper, job.display_class
+      if expected_display_args.nil?
+        assert_nil job.display_args
+      else
+        assert_equal expected_display_args, job.display_args
+      end
+      assert job.klass?(wrapper)
+    end
+  end
+
+  it "display helpers reject malformed ActiveJob class names" do
+    wrapper = "ActiveJob::QueueAdapters::ResqueAdapter::JobWrapper"
+
+    [[], {}, 123, false, nil, ""].each do |job_class|
+      job = {
+        "payload" => {
+          "class" => wrapper,
+          "args" => [{"job_class" => job_class, "arguments" => []}]
+        }
+      }
+      job.extend Resque::Plugins::ResqueCleaner::FailedJobEx
+
+      assert_equal wrapper, job.display_class
+      assert job.klass?(wrapper)
+    end
+  end
+
   it "#requeue with a block retries failure jobs which the block evaluates true" do
     requeued = @cleaner.requeue{|job| job["payload"]["args"][0]=="Jason"}
     assert_equal 13, requeued
