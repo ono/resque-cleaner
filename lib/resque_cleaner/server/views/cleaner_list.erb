@@ -89,9 +89,9 @@
               <% end %>
             </dd>
             <dt>Class</dt>
-            <dd><code><%= job['payload'] ? job['payload']['class'] : 'nil' %></code></dd>
+            <dd><code><%= job['payload'] ? job.display_class : 'nil' %></code></dd>
             <dt>Arguments</dt>
-            <dd><pre><%=h job['payload'] ? show_job_args(job['payload']['args']) : 'nil' %></pre></dd>
+            <dd><pre><%=h job['payload'] ? show_job_args(job.display_args) : 'nil' %></pre></dd>
             <dt>Exception</dt>
             <dd><code><%= job['exception'] %></code></dd>
             <dt>Error</dt>

@@ -131,7 +131,13 @@ def add_empty_payload_failure
 end
 
 def add_activejob_failure
-  data = {
+  encoded = Resque.encode(activejob_failure_data)
+  Resque.redis.rpush(:failed, encoded)
+  encoded
+end
+
+def activejob_failure_data
+  {
     :failed_at => Time.now.strftime("%Y/%m/%d %H:%M:%S %Z"),
     :payload   => {
       :class => "ActiveJob::QueueAdapters::ResqueAdapter::JobWrapper",
@@ -155,6 +161,4 @@ def add_activejob_failure
     :worker    => "worker",
     :queue     => "queue"
   }
-  data = Resque.encode(data)
-  Resque.redis.rpush(:failed, data)
 end

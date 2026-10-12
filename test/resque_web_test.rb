@@ -44,11 +44,27 @@ describe "resque-web" do
     assert last_response.ok?, last_response.errors
   end
 
-  it '#cleaner_list shows ActiveJob failed jobs properly formated' do
+  it '#cleaner_list filters and displays ActiveJob failures by the inner class' do
     add_activejob_failure
 
+    get "/cleaner"
+    assert last_response.ok?, last_response.errors
+    assert_includes last_response.body, 'ActiveJobGoodJob'
+    refute_includes last_response.body, 'ActiveJob::QueueAdapters::ResqueAdapter::JobWrapper'
+
     get "/cleaner_list", :c => "ActiveJobGoodJob"
-    assert last_response.body.include?("ActiveJobGoodJob")
+
+    assert last_response.ok?, last_response.errors
+    assert_includes last_response.body, '<option selected="selected" value="ActiveJobGoodJob">ActiveJobGoodJob</option>'
+    assert_includes last_response.body, '<code>ActiveJobGoodJob</code>'
+    assert_includes last_response.body, 'good_job'
+    refute_includes last_response.body, '<code>ActiveJob::QueueAdapters::ResqueAdapter::JobWrapper</code>'
+
+    get "/cleaner_dump", :c => "ActiveJobGoodJob"
+    dumped = JSON.parse(last_response.body)
+    assert_equal 1, dumped.size
+    assert_equal "ActiveJob::QueueAdapters::ResqueAdapter::JobWrapper", dumped[0].dig("payload", "class")
+    assert_equal "ActiveJobGoodJob", dumped[0].dig("payload", "args", 0, "job_class")
   end
 
   it '#cleaner_list shows the failed jobs' do
@@ -66,6 +82,34 @@ describe "resque-web" do
     get "/cleaner_list?t=%22%3e%3cscript%3ealert(document.cookie)%3c%2fscript%3e"
     assert last_response.body.include?('&quot;&gt;&lt;script&gt;alert(document.cookie)&lt;')
     refute last_response.body.include?('<script>alert(document.cookie)')
+  end
+
+  it "cleaner pages tolerate malformed ActiveJob wrapper arguments" do
+    data = activejob_failure_data
+    data[:payload][:args] = "invalid"
+    Resque.redis.rpush(:failed, Resque.encode(data))
+
+    get "/cleaner"
+    assert last_response.ok?, last_response.errors
+    assert_includes last_response.body, "ActiveJob::QueueAdapters::ResqueAdapter::JobWrapper"
+
+    get "/cleaner_list"
+    assert last_response.ok?, last_response.errors
+    assert_includes last_response.body, "ActiveJob::QueueAdapters::ResqueAdapter::JobWrapper"
+  end
+
+  it "cleaner pages tolerate malformed ActiveJob class names" do
+    data = activejob_failure_data
+    data[:payload][:args][0][:job_class] = []
+    Resque.redis.rpush(:failed, Resque.encode(data))
+
+    get "/cleaner"
+    assert last_response.ok?, last_response.errors
+    assert_includes last_response.body, "ActiveJob::QueueAdapters::ResqueAdapter::JobWrapper"
+
+    get "/cleaner_list"
+    assert last_response.ok?, last_response.errors
+    assert_includes last_response.body, "ActiveJob::QueueAdapters::ResqueAdapter::JobWrapper"
   end
 
   it '#cleaner_exec clears job' do

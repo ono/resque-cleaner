@@ -52,7 +52,7 @@ module Resque
       def stats_by_class(&block)
         jobs, stats = select(&block), {}
         jobs.each do |job|
-          klass = job["payload"] && job["payload"]["class"] ? job["payload"]["class"] : "UNKNOWN"
+          klass = job.display_class || "UNKNOWN"
           stats[klass] ||= 0
           stats[klass] += 1
         end
@@ -155,6 +155,33 @@ module Resque
 
       # Exntends job(Hash instance) with some helper methods.
       module FailedJobEx
+        ACTIVE_JOB_WRAPPER = "ActiveJob::QueueAdapters::ResqueAdapter::JobWrapper"
+
+        def display_class
+          payload = self["payload"]
+          return unless payload.is_a?(Hash)
+
+          if payload["class"] == ACTIVE_JOB_WRAPPER
+            wrapper = active_job_wrapper_payload
+            job_class = wrapper && wrapper["job_class"]
+            job_class.is_a?(String) && !job_class.empty? ? job_class : payload["class"]
+          else
+            payload["class"]
+          end
+        end
+
+        def display_args
+          payload = self["payload"]
+          return unless payload.is_a?(Hash)
+
+          if payload["class"] == ACTIVE_JOB_WRAPPER
+            wrapper = active_job_wrapper_payload
+            wrapper && wrapper.key?("arguments") ? wrapper["arguments"] : payload["args"]
+          else
+            payload["args"]
+          end
+        end
+
         # Returns true if the job has been already retried. Otherwise returns
         # false.
         def retried?
@@ -180,8 +207,8 @@ module Resque
 
         # Returns true if the class of the job matches. Otherwise returns false.
         def klass?(klass_or_name)
-          if self["payload"] && self["payload"]["class"]
-            self["payload"]["class"] == klass_or_name.to_s
+          if display_class
+            display_class == klass_or_name.to_s
           else
             klass_or_name=="UNKNOWN"
           end
@@ -195,6 +222,13 @@ module Resque
         # Returns true if the queue of the job matches. Otherwise returns false.
         def queue?(queue)
           self["queue"] == queue.to_s
+        end
+
+        private
+
+        def active_job_wrapper_payload
+          args = self.dig("payload", "args")
+          args[0] if args.is_a?(Array) && args[0].is_a?(Hash)
         end
       end
 
@@ -251,13 +285,6 @@ module Resque
           jobs = [] unless jobs
           jobs = [jobs] unless jobs.is_a?(Array)
           jobs.each{|j| j.extend FailedJobEx}
-
-          # ActiveJob compatibility layer
-          jobs.each do |job|
-            next unless job.dig("payload", "class") == "ActiveJob::QueueAdapters::ResqueAdapter::JobWrapper"
-            job["payload"]["class"] = job.dig("payload", "args", 0, "job_class")
-            job["payload"]["args"] = job.dig("payload", "args", 0, "arguments")
-          end
           jobs
         end
 
