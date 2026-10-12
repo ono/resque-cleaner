@@ -4,6 +4,8 @@ require 'digest/sha1'
 require 'json'
 require 'rack/test'
 
+Resque::Server.set :host_authorization, permitted_hosts: []
+
 class Minitest::Spec
   include Rack::Test::Methods
   def app
@@ -55,7 +57,8 @@ describe "resque-web" do
 
   it "#cleaner_list shows escaped XSS attempt" do
     get "/cleaner_list?t=%22%3e%3cscript%3ealert(document.cookie)%3c%2fscript%3e"
-    assert last_response.body.include?('&quot;&gt;&lt;script&gt;alert(document.cookie)&lt;&#x2F;script&gt;')
+    assert last_response.body.include?('&quot;&gt;&lt;script&gt;alert(document.cookie)&lt;')
+    refute last_response.body.include?('<script>alert(document.cookie)')
   end
 
   it '#cleaner_exec clears job' do
