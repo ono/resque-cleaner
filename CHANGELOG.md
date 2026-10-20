@@ -1,3 +1,7 @@
+## 0.5.1 (2026-10-19)
+
+* Security: reject cross-site POSTs to Cleaner routes, for apps on resque < 3.2 (#66)
+
 ## 0.5.0 (2026-10-12)
 
 * Ruby 3+ support: fix rendering the Cleaner page (#53)

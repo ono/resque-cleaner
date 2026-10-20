@@ -31,7 +31,7 @@ Requires Ruby 3.2+ and Resque 2.0+.
 Resque-Web integration
 ----------------------
 
-![Screen 1](https://github.com/ono/resque-cleaner/raw/master/misc/resque-cleaner-main.png)
+![Screen 1](https://github.com/ono/resque-cleaner/raw/main/misc/resque-cleaner-main.png)
 ![Screen 2](misc/resque-cleaner-list-with-regex.png)
 
 

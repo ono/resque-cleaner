@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name              = "resque-cleaner"
-  s.version           = "0.5.0"
+  s.version           = "0.5.1"
   s.summary           = "Resque plugin cleaning up failed jobs."
   s.homepage          = "https://github.com/ono/resque-cleaner"
   s.email             = "ononoma@gmail.com"
@@ -9,7 +9,7 @@ Gem::Specification.new do |s|
   s.required_ruby_version = '>= 3.2'
 
   s.metadata = {
-    "changelog_uri"         => "https://github.com/ono/resque-cleaner/blob/master/CHANGELOG.md",
+    "changelog_uri"         => "https://github.com/ono/resque-cleaner/blob/main/CHANGELOG.md",
     "source_code_uri"       => "https://github.com/ono/resque-cleaner",
     "rubygems_mfa_required" => "true"
   }
